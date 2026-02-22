@@ -200,30 +200,43 @@
     letter-spacing: 0.08em;
     flex: 1;
     text-transform: uppercase;
+    padding-right: 40px; /* espace pour les boutons flottants */
   }
   .ingredient-item .del-ing {
     opacity: 0;
-    background: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--surface2);
     border: none;
     color: var(--red);
     cursor: pointer;
-    font-size: 1rem;
-    padding: 0 2px;
+    font-size: 0.9rem;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 2px;
     line-height: 1;
     transition: opacity 0.2s;
+    z-index: 1;
   }
   .ingredient-item:hover .del-ing { opacity: 1; }
 
   .ingredient-item .edit-ing {
     opacity: 0;
-    background: none;
+    position: absolute;
+    top: 4px;
+    right: 26px;
+    background: var(--surface2);
     border: none;
     color: var(--gold-dim);
     cursor: pointer;
-    font-size: 1rem;
-    padding: 0 2px;
+    font-size: 0.9rem;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 2px;
     line-height: 1;
     transition: opacity 0.2s;
+    z-index: 1;
   }
   .ingredient-item:hover .edit-ing { opacity: 1; }
 
