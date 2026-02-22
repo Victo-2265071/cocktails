@@ -214,6 +214,34 @@
   }
   .ingredient-item:hover .del-ing { opacity: 1; }
 
+  .ingredient-item .edit-ing {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--gold-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 2px;
+    line-height: 1;
+    transition: opacity 0.2s;
+  }
+  .ingredient-item:hover .edit-ing { opacity: 1; }
+
+  .ing-edit-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--gold-dim);
+    color: var(--text);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    outline: none;
+    padding: 1px 0;
+    width: 100%;
+  }
+
   /* ADD INGREDIENT FORM */
   .add-row {
     display: flex;
@@ -637,22 +665,198 @@
   }
   .form-group select:focus { border-color: var(--gold-dim); }
 
-  /* GLASS FILTER */
-  .glass-filter-select {
+  /* GLASS FILTER — remplacé par le panneau unifié */
+
+  /* FILTER BUTTON + PANEL */
+  .filter-btn-wrap {
+    position: relative;
+  }
+  .filter-main-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .filter-main-btn.has-filters {
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+  .filter-count-badge {
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 6px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 320px;
+    background: var(--surface2);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    z-index: 300;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  /* Row header (cliquable pour ouvrir/fermer) */
+  .frow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .frow:hover { background: rgba(201,168,76,0.05); }
+  .frow-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: 1;
+  }
+  .frow-val {
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .frow-val.unset { color: var(--text-muted); }
+  .frow-arrow {
+    color: var(--text-muted);
+    font-size: 1rem;
+    transition: transform 0.2s;
+    line-height: 1;
+  }
+  .frow-arrow.open { transform: rotate(90deg); }
+
+  /* Sous-section dépliable */
+  .fsection {
+    padding: 4px 18px 14px;
+    border-top: 1px solid rgba(46,42,31,0.6);
+    background: rgba(0,0,0,0.15);
+  }
+
+  .filter-panel-section {
+    padding: 12px 18px;
+  }
+  .filter-panel-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .filter-panel-divider {
+    height: 1px;
+    background: var(--border);
+  }
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .filter-chip {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-muted);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .filter-chip:hover { border-color: var(--gold-dim); color: var(--text); }
+  .filter-chip.active { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,0.1); }
+
+  /* Ingredient search inside panel */
+  .fing-search-wrap { position: relative; margin-top: 4px; }
+  .fing-input {
+    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
     font-family: 'Josefin Sans', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    padding: 12px 14px;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    padding: 10px 12px;
     outline: none;
-    cursor: pointer;
-    appearance: none;
-    transition: border-color 0.3s;
+    transition: border-color 0.2s;
   }
-  .glass-filter-select:focus, .glass-filter-select:hover { border-color: var(--gold-dim); }
+  .fing-input:focus { border-color: var(--gold-dim); }
+  .fing-input::placeholder { color: var(--text-muted); }
+  .fing-dropdown {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--gold-dim);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    z-index: 400;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .fing-dropdown div {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .fing-dropdown div:hover { background: rgba(201,168,76,0.1); }
+  .fing-active-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--gold-dim);
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+  }
+  .fing-clear {
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 1rem; padding: 0; line-height: 1;
+    margin-left: auto;
+    transition: color 0.15s;
+  }
+  .fing-clear:hover { color: var(--red); }
+
+  /* Rating stars inside filter panel */
+  .frating-stars-wrap {
+    padding: 4px 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .frating-stars-wrap .stars-input { gap: 6px; }
+  .frating-stars-wrap .star-btn { font-size: 1.6rem; }
+
+  .filter-panel-footer {
+    padding: 10px 18px 14px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border);
+  }
 
   /* ─── RESPONSIVE / MOBILE ───────────────────────────────────────────────── */
 
@@ -712,8 +916,12 @@
       gap: 8px;
     }
     .recipes-toolbar input,
-    .glass-filter-select,
+    .filter-btn-wrap,
     .filter-toggle {
+      width: 100%;
+    }
+    .filter-panel {
+      min-width: unset;
       width: 100%;
     }
     .btn.primary[onclick*="startNew"] {
@@ -850,21 +1058,101 @@
 <div id="panel-recipes" class="panel">
   <div class="recipes-toolbar">
     <input type="text" id="recipe-filter" placeholder="Rechercher une recette…" oninput="renderRecipes()">
-    <select class="glass-filter-select" id="glass-filter" onchange="renderRecipes()">
-      <option value="">Tous les verres</option>
-      <option value="shooter">🥃 Shooter</option>
-      <option value="highball">🥤 Verre highball</option>
-      <option value="lowball">🥃 Verre bas (rocks)</option>
-      <option value="coupe">🍸 Coupe</option>
-      <option value="martini">🍸 Martini</option>
-      <option value="hurricane">🌀 Hurricane</option>
-      <option value="flute">🥂 Flûte</option>
-      <option value="mug">☕ Mug / Tasse</option>
-      <option value="autre">▢ Autre</option>
-    </select>
-    <div class="filter-toggle" id="filter-toggle" onclick="toggleFilter()">
-      <div class="dot"></div>
-      Réalisables seulement
+    <div class="filter-btn-wrap">
+      <button class="btn filter-main-btn" id="filter-main-btn" onclick="toggleFilterPanel()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Filtres
+        <span class="filter-count-badge" id="filter-count-badge" style="display:none"></span>
+      </button>
+      <div class="filter-panel" id="filter-panel" style="display:none">
+
+        <!-- Type de verre -->
+        <div class="frow" onclick="toggleFSection('fsec-glass')">
+          <span class="frow-label">Type de verre</span>
+          <span class="frow-val unset" id="fval-glass">Tous</span>
+          <span class="frow-arrow" id="farr-glass">›</span>
+        </div>
+        <div class="fsection" id="fsec-glass" style="display:none">
+          <div class="filter-chips" id="glass-chips">
+            <button class="filter-chip active" data-val="" onclick="selectGlass(this)">Tous</button>
+            <button class="filter-chip" data-val="shooter" onclick="selectGlass(this)">🥃 Shooter</button>
+            <button class="filter-chip" data-val="highball" onclick="selectGlass(this)">🥤 Highball</button>
+            <button class="filter-chip" data-val="lowball" onclick="selectGlass(this)">🥃 Rocks</button>
+            <button class="filter-chip" data-val="coupe" onclick="selectGlass(this)">🍸 Coupe</button>
+            <button class="filter-chip" data-val="martini" onclick="selectGlass(this)">🍸 Martini</button>
+            <button class="filter-chip" data-val="hurricane" onclick="selectGlass(this)">🌀 Hurricane</button>
+            <button class="filter-chip" data-val="flute" onclick="selectGlass(this)">🥂 Flûte</button>
+            <button class="filter-chip" data-val="mug" onclick="selectGlass(this)">☕ Mug</button>
+            <button class="filter-chip" data-val="autre" onclick="selectGlass(this)">▢ Autre</button>
+          </div>
+        </div>
+        <div class="filter-panel-divider"></div>
+
+        <!-- Ingrédient -->
+        <div class="frow" onclick="toggleFSection('fsec-ing')">
+          <span class="frow-label">Ingrédient</span>
+          <span class="frow-val unset" id="fval-ing">Tous</span>
+          <span class="frow-arrow" id="farr-ing">›</span>
+        </div>
+        <div class="fsection" id="fsec-ing" style="display:none">
+          <div class="fing-search-wrap">
+            <input type="text" id="fing-input" class="fing-input" placeholder="Rechercher un ingrédient…"
+              oninput="showFilterIngAC(this)" onfocus="showFilterIngAC(this)" autocomplete="off">
+            <div class="fing-dropdown" id="fing-dropdown" style="display:none"></div>
+          </div>
+          <div id="fing-active-tag" style="display:none" class="fing-active-tag">
+            <span id="fing-active-name"></span>
+            <button onclick="clearIngFilter()" class="fing-clear">×</button>
+          </div>
+        </div>
+        <div class="filter-panel-divider"></div>
+
+        <!-- Note minimale -->
+        <div class="frow" onclick="toggleFSection('fsec-rating')">
+          <span class="frow-label">Note minimale</span>
+          <span class="frow-val unset" id="fval-rating">Toutes</span>
+          <span class="frow-arrow" id="farr-rating">›</span>
+        </div>
+        <div class="fsection" id="fsec-rating" style="display:none">
+          <div class="frating-stars-wrap">
+            <div class="stars-input" id="frating-stars">
+              <button type="button" class="star-btn" data-val="1" onclick="selectFilterRating(1)">★</button>
+              <button type="button" class="star-btn" data-val="2" onclick="selectFilterRating(2)">★</button>
+              <button type="button" class="star-btn" data-val="3" onclick="selectFilterRating(3)">★</button>
+              <button type="button" class="star-btn" data-val="4" onclick="selectFilterRating(4)">★</button>
+              <button type="button" class="star-btn" data-val="5" onclick="selectFilterRating(5)">★</button>
+              <button type="button" class="star-btn" style="font-size:0.8rem;color:var(--text-muted);letter-spacing:0.1em;" onclick="selectFilterRating(0)">✕</button>
+            </div>
+          </div>
+        </div>
+        <div class="filter-panel-divider"></div>
+
+        <!-- Shake -->
+        <div class="frow" onclick="toggleFSection('fsec-shake')">
+          <span class="frow-label">Shake</span>
+          <span class="frow-val unset" id="fval-shake">Peu importe</span>
+          <span class="frow-arrow" id="farr-shake">›</span>
+        </div>
+        <div class="fsection" id="fsec-shake" style="display:none">
+          <div class="filter-chips">
+            <button class="filter-chip active" data-val="" onclick="selectShake(this)">Peu importe</button>
+            <button class="filter-chip" data-val="yes" onclick="selectShake(this)">Shake requis</button>
+            <button class="filter-chip" data-val="no" onclick="selectShake(this)">Sans shake</button>
+          </div>
+        </div>
+        <div class="filter-panel-divider"></div>
+
+        <!-- Booleans -->
+        <div class="filter-panel-section" style="padding-top:10px;padding-bottom:10px;">
+          <div class="filter-chips">
+            <button class="filter-chip" id="chip-makeable" onclick="toggleFilterChip(this,'makeable')">✓ Réalisables</button>
+          </div>
+        </div>
+
+        <div class="filter-panel-footer">
+          <button class="btn" style="font-size:0.75rem;padding:8px 14px;" onclick="resetFilters()">Réinitialiser</button>
+        </div>
+      </div>
     </div>
     <button class="btn primary" onclick="showTab('manage'); startNew()">+ Nouvelle recette</button>
   </div>
@@ -965,10 +1253,6 @@
       <input type="text" id="cfg-repo" placeholder="ex: mon-bar">
     </div>
     <div class="form-group">
-      <label>Nom du fichier JSON</label>
-      <input type="text" id="cfg-path" placeholder="cocktails.json" value="cocktails.json">
-    </div>
-    <div class="form-group">
       <label>Personal Access Token</label>
       <input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
     </div>
@@ -984,12 +1268,22 @@
 
 <script>
 // ─── GITHUB JSON BACKEND ──────────────────────────────────────────────────────
-// Structure du JSON : { ingredients: [...], myIngredients: [...], recipes: [...] }
-// Chaque objet a un champ "id" (entier, auto-incrémenté par nos soins)
+// Trois fichiers fixes dans le repo :
+//   ingredients.json   → { ingredients: [...] }
+//   myIngredients.json → { myIngredients: [...] }
+//   recipes.json       → { recipes: [...] }
 
-let _db = null;        // cache en mémoire
-let _fileSha = null;   // SHA du fichier pour les commits GitHub
-let _ghConfig = null;  // { owner, repo, token, path }
+const FILE_INGS  = 'ingredients.json';
+const FILE_INV   = 'myIngredients.json';
+const FILE_REC   = 'recipes.json';
+
+let _dbCat = null;  // { ingredients: [...] }
+let _dbInv = null;  // { myIngredients: [...] }
+let _dbRec = null;  // { recipes: [...] }
+let _shaCat = null;
+let _shaInv = null;
+let _shaRec = null;
+let _ghConfig = null; // { owner, repo, token }
 
 const CONFIG_KEY = 'le-bar-gh-config';
 
@@ -1019,23 +1313,24 @@ async function ghRequest(method, endpoint, body) {
   return res.json();
 }
 
-async function ghReadFile() {
-  const { owner, repo, path } = _ghConfig;
-  const data = await ghRequest('GET', `/repos/${owner}/${repo}/contents/${path}`);
-  _fileSha = data.sha;
+async function ghReadOneFile(filename) {
+  const { owner, repo } = _ghConfig;
+  const encoded = encodeURIComponent(filename);
+  const data = await ghRequest('GET', `/repos/${owner}/${repo}/contents/${encoded}`);
   const content = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
-  return content;
+  return { content, sha: data.sha };
 }
 
-async function ghWriteFile(content, message = 'mise à jour cocktails.json') {
-  const { owner, repo, path } = _ghConfig;
+async function ghWriteOneFile(filename, content, sha, message) {
+  const { owner, repo } = _ghConfig;
+  const encoded = encodeURIComponent(filename);
   const body = {
     message,
     content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
-    sha: _fileSha
+    ...(sha ? { sha } : {})
   };
-  const data = await ghRequest('PUT', `/repos/${owner}/${repo}/contents/${path}`, body);
-  _fileSha = data.content.sha;
+  const data = await ghRequest('PUT', `/repos/${owner}/${repo}/contents/${encoded}`, body);
+  return data.content.sha;
 }
 
 // ── Initialisation ─────────────────────────────────────────────────────────────
@@ -1051,91 +1346,126 @@ async function openDB() {
 async function loadFromGitHub() {
   showLoading(true);
   try {
-    _db = await ghReadFile();
-    // Migrations : s'assurer que les 3 stores existent
-    if (!_db.ingredients) _db.ingredients = [];
-    if (!_db.myIngredients) _db.myIngredients = [];
-    if (!_db.recipes) _db.recipes = [];
-    // Normaliser tous les ids en nombres
-    ['ingredients','myIngredients','recipes'].forEach(store => {
-      _db[store].forEach(item => { if (item.id !== undefined) item.id = parseInt(item.id); });
+    // Charger les trois fichiers en parallèle (tolérance si l'un est absent)
+    const [rCat, rInv, rRec] = await Promise.allSettled([
+      ghReadOneFile(FILE_INGS),
+      ghReadOneFile(FILE_INV),
+      ghReadOneFile(FILE_REC)
+    ]);
+
+    _dbCat = rCat.status === 'fulfilled' ? rCat.value.content : {};
+    _shaCat = rCat.status === 'fulfilled' ? rCat.value.sha : null;
+
+    _dbInv = rInv.status === 'fulfilled' ? rInv.value.content : {};
+    _shaInv = rInv.status === 'fulfilled' ? rInv.value.sha : null;
+
+    _dbRec = rRec.status === 'fulfilled' ? rRec.value.content : {};
+    _shaRec = rRec.status === 'fulfilled' ? rRec.value.sha : null;
+
+    // S'assurer que les stores existent
+    if (!_dbCat.ingredients)   _dbCat.ingredients   = [];
+    if (!_dbInv.myIngredients) _dbInv.myIngredients = [];
+    if (!_dbRec.recipes)       _dbRec.recipes        = [];
+
+    // Normaliser les ids
+    _dbCat.ingredients.forEach(i => { if (i.id !== undefined) i.id = parseInt(i.id); });
+    _dbInv.myIngredients.forEach(i => { if (i.id !== undefined) i.id = parseInt(i.id); });
+    _dbRec.recipes.forEach(i => { if (i.id !== undefined) i.id = parseInt(i.id); });
+
+    // Migration : ingrédients par nom → par id dans les recettes
+    const nameToIdMig = {};
+    _dbCat.ingredients.forEach(i => { nameToIdMig[i.name.toLowerCase()] = i.id; });
+    let migrated = false;
+    _dbRec.recipes.forEach(r => {
+      ['ingredients', 'toppings'].forEach(field => {
+        if (!r[field]) return;
+        r[field].forEach(ing => {
+          if (!ing.id && ing.name) {
+            const foundId = nameToIdMig[ing.name.toLowerCase()];
+            if (foundId) { ing.id = foundId; delete ing.name; migrated = true; }
+          }
+        });
+      });
     });
+
     showLoading(false);
+    if (migrated) await persistRecipes('migration: ingrédients référencés par id');
     await seedIfEmpty();
     await refreshIngCache();
     renderIngredients();
   } catch (e) {
     showLoading(false);
-    // Si le fichier n'existe pas encore, on le crée
-    if (e.message && e.message.includes('Not Found')) {
-      _db = { ingredients: [], myIngredients: [], recipes: [] };
-      _fileSha = null;
-      await ghCreateFile();
-      await seedIfEmpty();
-      await refreshIngCache();
-      renderIngredients();
-    } else {
-      showError('Impossible de lire le fichier GitHub : ' + e.message);
-    }
+    showError('Impossible de lire les fichiers GitHub : ' + e.message);
   }
 }
 
-async function ghCreateFile() {
-  const { owner, repo, path } = _ghConfig;
-  const body = {
-    message: 'création cocktails.json',
-    content: btoa(unescape(encodeURIComponent(JSON.stringify(_db, null, 2))))
-  };
-  const data = await ghRequest('PUT', `/repos/${owner}/${repo}/contents/${path}`, body);
-  _fileSha = data.content.sha;
+// ── Persist ────────────────────────────────────────────────────────────────────
+async function persistCatalogue(message = 'mise à jour ingredients.json') {
+  _shaCat = await ghWriteOneFile(FILE_INGS, _dbCat, _shaCat, message);
 }
 
-async function persistDB(message) {
-  await ghWriteFile(_db, message);
+async function persistInventaire(message = 'mise à jour myIngredients.json') {
+  _shaInv = await ghWriteOneFile(FILE_INV, _dbInv, _shaInv, message);
 }
 
-// ── Helpers ID ─────────────────────────────────────────────────────────────────
+async function persistRecipes(message = 'mise à jour recipes.json') {
+  _shaRec = await ghWriteOneFile(FILE_REC, _dbRec, _shaRec, message);
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function dbFor(store) {
+  if (store === 'recipes')       return _dbRec;
+  if (store === 'myIngredients') return _dbInv;
+  return _dbCat;
+}
+async function persistFor(store, message) {
+  if (store === 'recipes')       await persistRecipes(message);
+  else if (store === 'myIngredients') await persistInventaire(message);
+  else await persistCatalogue(message);
+}
+
 function nextId(store) {
-  const items = _db[store];
+  const items = dbFor(store)[store];
   if (!items.length) return 1;
   return Math.max(...items.map(i => i.id || 0)) + 1;
 }
 
-// ── API "tx" — même interface qu'avant ────────────────────────────────────────
+// ── API "tx" ───────────────────────────────────────────────────────────────────
 function txGet(store, key) {
   const k = typeof key === 'string' ? parseInt(key) : key;
-  return Promise.resolve(_db[store].find(i => i.id === k) || null);
+  return Promise.resolve(dbFor(store)[store].find(i => i.id === k) || null);
 }
 function txGetAll(store) {
-  return Promise.resolve([..._db[store]]);
+  return Promise.resolve([...dbFor(store)[store]]);
 }
 async function txPut(store, val) {
   if (val.id !== undefined) val.id = typeof val.id === 'string' ? parseInt(val.id) : val.id;
-  const idx = _db[store].findIndex(i => i.id === val.id);
-  if (idx >= 0) _db[store][idx] = val;
-  else _db[store].push(val);
-  await persistDB(`modif ${store} #${val.id}`);
+  const arr = dbFor(store)[store];
+  const idx = arr.findIndex(i => i.id === val.id);
+  if (idx >= 0) arr[idx] = val;
+  else arr.push(val);
+  await persistFor(store, `modif ${store} #${val.id}`);
   return val.id;
 }
 async function txAdd(store, val) {
-  // Vérification unicité du nom pour ingredients
-  if (store === 'ingredients' && _db.ingredients.find(i => i.name === val.name)) {
+  if (store === 'ingredients' && _dbCat.ingredients.find(i => i.name === val.name)) {
     throw new Error('duplicate');
   }
   val.id = nextId(store);
-  _db[store].push(val);
-  await persistDB(`ajout ${store} #${val.id}`);
+  dbFor(store)[store].push(val);
+  await persistFor(store, `ajout ${store} #${val.id}`);
   return val.id;
 }
 async function txDelete(store, key) {
   const k = typeof key === 'string' ? parseInt(key) : key;
-  _db[store] = _db[store].filter(i => i.id !== k);
-  await persistDB(`suppression ${store} #${k}`);
+  const db = dbFor(store);
+  db[store] = db[store].filter(i => i.id !== k);
+  await persistFor(store, `suppression ${store} #${k}`);
 }
 
 // ─── SEED DATA ────────────────────────────────────────────────────────────────
 async function seedIfEmpty() {
-  if (_db.ingredients.length > 0) return;
+  if (_dbCat.ingredients.length > 0) return;
 
   // Insertion directe en mémoire (sans commit intermédiaire)
   const defaultNames = [
@@ -1150,68 +1480,76 @@ async function seedIfEmpty() {
   ];
   let ingId = 1;
   for (const name of defaultNames) {
-    _db.ingredients.push({ id: ingId++, name });
+    _dbCat.ingredients.push({ id: ingId++, name });
   }
+
+  // Construire un index name->id depuis les ingrédients qu'on vient d'insérer
+  const nameToId = {};
+  _dbCat.ingredients.forEach(i => { nameToId[i.name] = i.id; });
+  function sid(name) { return nameToId[name] || null; }
 
   const seedRecipes = [
     { name: 'Mojito', ingredients: [
-      { name: 'Rhum blanc', qty: '60 ml' }, { name: 'Jus de lime', qty: '30 ml' },
-      { name: 'Sirop de sucre', qty: '15 ml' }, { name: 'Menthe fraîche', qty: '8 feuilles' },
-      { name: 'Eau gazeuse', qty: 'pour compléter' }, { name: 'Glace', qty: 'au besoin' }
+      { id: sid('Rhum blanc'), qty: '60 ml' }, { id: sid('Jus de lime'), qty: '30 ml' },
+      { id: sid('Sirop de sucre'), qty: '15 ml' }, { id: sid('Menthe fra\u00eeche'), qty: '8 feuilles' },
+      { id: sid('Eau gazeuse'), qty: 'pour compl\u00e9ter' }, { id: sid('Glace'), qty: 'au besoin' }
     ]},
     { name: 'Margarita', ingredients: [
-      { name: 'Tequila', qty: '50 ml' }, { name: 'Triple sec', qty: '20 ml' },
-      { name: 'Jus de lime', qty: '30 ml' }, { name: 'Sel', qty: 'pour le bord' }
+      { id: sid('Tequila'), qty: '50 ml' }, { id: sid('Triple sec'), qty: '20 ml' },
+      { id: sid('Jus de lime'), qty: '30 ml' }, { id: sid('Sel'), qty: 'pour le bord' }
     ]},
     { name: 'Cosmopolitan', ingredients: [
-      { name: 'Vodka', qty: '45 ml' }, { name: 'Triple sec', qty: '15 ml' },
-      { name: 'Jus de lime', qty: '15 ml' }, { name: 'Jus de canneberge', qty: '30 ml' }
+      { id: sid('Vodka'), qty: '45 ml' }, { id: sid('Triple sec'), qty: '15 ml' },
+      { id: sid('Jus de lime'), qty: '15 ml' }, { id: sid('Jus de canneberge'), qty: '30 ml' }
     ]},
     { name: 'Aperol Spritz', ingredients: [
-      { name: 'Aperol', qty: '60 ml' }, { name: 'Prosecco', qty: '90 ml' },
-      { name: 'Eau gazeuse', qty: '30 ml' }, { name: 'Orange', qty: '1 tranche' }
+      { id: sid('Aperol'), qty: '60 ml' }, { id: sid('Prosecco'), qty: '90 ml' },
+      { id: sid('Eau gazeuse'), qty: '30 ml' }, { id: sid('Orange'), qty: '1 tranche' }
     ]},
     { name: 'Old Fashioned', ingredients: [
-      { name: 'Bourbon', qty: '60 ml' }, { name: 'Sirop de sucre', qty: '5 ml' },
-      { name: 'Angostura bitters', qty: '2 traits' }, { name: 'Orange', qty: '1 zeste' }
+      { id: sid('Bourbon'), qty: '60 ml' }, { id: sid('Sirop de sucre'), qty: '5 ml' },
+      { id: sid('Angostura bitters'), qty: '2 traits' }, { id: sid('Orange'), qty: '1 zeste' }
     ]},
     { name: 'Gin Tonic', ingredients: [
-      { name: 'Gin', qty: '50 ml' }, { name: 'Eau tonique', qty: '150 ml' },
-      { name: 'Lime', qty: '1 quartier' }, { name: 'Glace', qty: 'au besoin' }
+      { id: sid('Gin'), qty: '50 ml' }, { id: sid('Eau tonique'), qty: '150 ml' },
+      { id: sid('Lime'), qty: '1 quartier' }, { id: sid('Glace'), qty: 'au besoin' }
     ]},
     { name: 'Moscow Mule', ingredients: [
-      { name: 'Vodka', qty: '50 ml' }, { name: 'Ginger beer', qty: '120 ml' },
-      { name: 'Jus de lime', qty: '15 ml' }, { name: 'Menthe fraîche', qty: 'quelques feuilles' }
+      { id: sid('Vodka'), qty: '50 ml' }, { id: sid('Ginger beer'), qty: '120 ml' },
+      { id: sid('Jus de lime'), qty: '15 ml' }, { id: sid('Menthe fra\u00eeche'), qty: 'quelques feuilles' }
     ]},
     { name: 'Daiquiri', ingredients: [
-      { name: 'Rhum blanc', qty: '60 ml' }, { name: 'Jus de lime', qty: '30 ml' },
-      { name: 'Sirop de sucre', qty: '15 ml' }
+      { id: sid('Rhum blanc'), qty: '60 ml' }, { id: sid('Jus de lime'), qty: '30 ml' },
+      { id: sid('Sirop de sucre'), qty: '15 ml' }
     ]},
     { name: 'Negroni', ingredients: [
-      { name: 'Gin', qty: '30 ml' }, { name: 'Vermouth doux', qty: '30 ml' },
-      { name: 'Campari', qty: '30 ml' }, { name: 'Orange', qty: '1 zeste' }
+      { id: sid('Gin'), qty: '30 ml' }, { id: sid('Vermouth doux'), qty: '30 ml' },
+      { id: sid('Campari'), qty: '30 ml' }, { id: sid('Orange'), qty: '1 zeste' }
     ]},
-    { name: 'Piña Colada', ingredients: [
-      { name: 'Rhum blanc', qty: '60 ml' }, { name: 'Lait de coco', qty: '60 ml' },
-      { name: "Jus d'ananas", qty: '90 ml' }, { name: 'Glace', qty: 'au besoin' }
+    { name: 'Pi\u00f1a Colada', ingredients: [
+      { id: sid('Rhum blanc'), qty: '60 ml' }, { id: sid('Lait de coco'), qty: '60 ml' },
+      { id: sid("Jus d'ananas"), qty: '90 ml' }, { id: sid('Glace'), qty: 'au besoin' }
     ]}
   ];
   let recId = 1;
   for (const r of seedRecipes) {
-    _db.recipes.push({ id: recId++, ...r, toppings: [], glass: '', rating: 0, notes: '' });
+    _dbRec.recipes.push({ id: recId++, ...r, toppings: [], glass: '', rating: 0, notes: '' });
   }
 
-  // Un seul commit pour tout le seed
-  await persistDB('initialisation des données par défaut');
+  // Commit les trois fichiers en parallèle
+  await Promise.all([
+    persistCatalogue('initialisation ingredients par défaut'),
+    persistRecipes('initialisation recettes par défaut')
+  ]);
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let filterActive = false;
-let _cachedIngNames = []; // cache global pour l'autocomplete
+let _cachedIngs = []; // cache global pour l'autocomplete [{id, name}]
 
 async function refreshIngCache() {
   const all = await txGetAll('ingredients');
-  _cachedIngNames = all.map(i => i.name);
+  _cachedIngs = all.map(i => ({ id: i.id, name: i.name }));
 }
 
 // ─── GLASS ICONS ──────────────────────────────────────────────────────────────
@@ -1279,9 +1617,10 @@ async function renderIngredients() {
     return;
   }
   grid.innerHTML = filtered.map(i => `
-    <div class="ingredient-item ${mySet.has(i.id) ? 'checked' : ''}" onclick="toggleIng(${i.id}, this)">
+    <div class="ingredient-item ${mySet.has(i.id) ? 'checked' : ''}" onclick="toggleIng(${i.id}, this)" id="ing-item-${i.id}">
       <div class="check"></div>
       <span class="name">${i.name}</span>
+      <button class="edit-ing" onclick="event.stopPropagation();startEditIng(${i.id})" title="Renommer">✎</button>
       <button class="del-ing" onclick="event.stopPropagation();deleteIng(${i.id})" title="Supprimer">×</button>
     </div>
   `).join('');
@@ -1316,34 +1655,268 @@ async function deleteIng(id) {
   toast('Ingrédient supprimé');
 }
 
+function startEditIng(id) {
+  const item = document.getElementById('ing-item-' + id);
+  if (!item) return;
+  const nameEl = item.querySelector('.name');
+  const currentName = nameEl.textContent;
+  // Remplacer le span par un input inline
+  item.querySelector('.edit-ing').style.display = 'none';
+  item.querySelector('.del-ing').style.display = 'none';
+  item.style.pointerEvents = 'none'; // bloquer le toggle pendant l'édition
+  const input = document.createElement('input');
+  input.className = 'ing-edit-input';
+  input.value = currentName;
+  nameEl.replaceWith(input);
+  input.focus();
+  input.select();
+  const confirm_ = async () => {
+    const newName = input.value.trim();
+    if (newName && newName !== currentName) {
+      await renameIng(id, newName);
+    } else {
+      renderIngredients();
+    }
+  };
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirm_();
+    if (e.key === 'Escape') renderIngredients();
+    e.stopPropagation();
+  });
+  input.addEventListener('blur', confirm_);
+}
+
+async function renameIng(id, newName) {
+  // Vérifier unicité
+  const all = await txGetAll('ingredients');
+  if (all.find(i => i.id !== id && i.name.toLowerCase() === newName.toLowerCase())) {
+    toast('Ce nom existe déjà');
+    renderIngredients();
+    return;
+  }
+  const ing = await txGet('ingredients', id);
+  if (!ing) return;
+  await txPut('ingredients', { ...ing, name: newName });
+  await refreshIngCache();
+  renderIngredients();
+  toast('Ingrédient renommé');
+}
+
 // ─── RECIPES ──────────────────────────────────────────────────────────────────
-function toggleFilter() {
-  filterActive = !filterActive;
-  const el = document.getElementById('filter-toggle');
-  el.classList.toggle('on', filterActive);
+let _activeGlass   = '';
+let _activeIngId   = null;  // id de l'ingrédient filtré
+let _minRating     = 0;
+
+function toggleFilterPanel() {
+  const panel = document.getElementById('filter-panel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.filter-btn-wrap')) {
+    const panel = document.getElementById('filter-panel');
+    if (panel) panel.style.display = 'none';
+  }
+  if (!e.target.closest('.fing-search-wrap')) {
+    const dd = document.getElementById('fing-dropdown');
+    if (dd) dd.style.display = 'none';
+  }
+});
+
+// ── Ouvrir/fermer une sous-section ────────────────────────────────────────────
+function toggleFSection(id) {
+  const sec = document.getElementById(id);
+  const key = id.replace('fsec-', '');
+  const arr = document.getElementById('farr-' + key);
+  const isOpen = sec.style.display !== 'none';
+  sec.style.display = isOpen ? 'none' : 'block';
+  arr.classList.toggle('open', !isOpen);
+  // Peupler l'autocomplete ingrédient à l'ouverture
+  if (!isOpen && key === 'ing') {
+    document.getElementById('fing-input').value = '';
+    document.getElementById('fing-dropdown').style.display = 'none';
+  }
+}
+
+// ── Verre ─────────────────────────────────────────────────────────────────────
+function selectGlass(btn) {
+  document.querySelectorAll('#glass-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  _activeGlass = btn.dataset.val;
+  const valEl = document.getElementById('fval-glass');
+  valEl.textContent = btn.dataset.val ? btn.textContent.trim() : 'Tous';
+  valEl.classList.toggle('unset', !btn.dataset.val);
+  updateFilterBadge();
   renderRecipes();
+}
+
+// ── Ingrédient autocomplete ───────────────────────────────────────────────────
+function showFilterIngAC(input) {
+  const val = input.value.toLowerCase().trim();
+  const dd = document.getElementById('fing-dropdown');
+  const matches = val
+    ? _cachedIngs.filter(i => i.name.toLowerCase().includes(val)).slice(0, 10)
+    : _cachedIngs.slice().sort((a,b) => a.name.localeCompare(b.name)).slice(0, 12);
+  if (!matches.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = matches.map(i => {
+    let label = i.name;
+    if (val) {
+      const idx = i.name.toLowerCase().indexOf(val);
+      if (idx >= 0) label = i.name.slice(0,idx) + `<strong style="color:var(--gold-light)">${i.name.slice(idx, idx+val.length)}</strong>` + i.name.slice(idx+val.length);
+    }
+    return `<div onmousedown="selectFilterIng(${i.id}, '${i.name.replace(/'/g,"\\'")}')">${label}</div>`;
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function selectFilterIng(id, name) {
+  _activeIngId = id;
+  document.getElementById('fing-input').value = '';
+  document.getElementById('fing-dropdown').style.display = 'none';
+  document.getElementById('fing-active-name').textContent = name;
+  document.getElementById('fing-active-tag').style.display = 'flex';
+  const valEl = document.getElementById('fval-ing');
+  valEl.textContent = name;
+  valEl.classList.remove('unset');
+  updateFilterBadge();
+  renderRecipes();
+}
+
+function clearIngFilter() {
+  _activeIngId = null;
+  document.getElementById('fing-active-tag').style.display = 'none';
+  document.getElementById('fing-active-name').textContent = '';
+  const valEl = document.getElementById('fval-ing');
+  valEl.textContent = 'Tous';
+  valEl.classList.add('unset');
+  updateFilterBadge();
+  renderRecipes();
+}
+
+// ── Note minimale (étoiles) ───────────────────────────────────────────────────
+function selectFilterRating(val) {
+  _minRating = val;
+  // Mettre à jour l'affichage des étoiles (réutilise la logique de setRating)
+  document.querySelectorAll('#frating-stars .star-btn[data-val]').forEach(btn => {
+    btn.classList.toggle('on', parseInt(btn.dataset.val) <= val);
+  });
+  const valEl = document.getElementById('fval-rating');
+  valEl.textContent = val ? '≥ ' + '★'.repeat(val) : 'Toutes';
+  valEl.classList.toggle('unset', !val);
+  updateFilterBadge();
+  renderRecipes();
+}
+
+// ── Shake ─────────────────────────────────────────────────────────────────────
+let filterShake = ''; // '' | 'yes' | 'no'
+
+function selectShake(btn) {
+  document.querySelectorAll('#fsec-shake .filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  filterShake = btn.dataset.val;
+  const valEl = document.getElementById('fval-shake');
+  const labels = { '': 'Peu importe', 'yes': 'Requis', 'no': 'Non requis' };
+  valEl.textContent = labels[filterShake];
+  valEl.classList.toggle('unset', !filterShake);
+  updateFilterBadge();
+  renderRecipes();
+}
+
+// ── Booleans (makeable seulement désormais) ───────────────────────────────────
+function toggleFilterChip(btn, type) {
+  if (type === 'makeable') {
+    filterActive = !filterActive;
+    btn.classList.toggle('active', filterActive);
+    updateFilterBadge();
+    renderRecipes();
+  }
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+function resetFilters() {
+  _activeGlass = '';
+  _activeIngId = null;
+  _minRating = 0;
+  filterActive = false;
+  filterShake = false;
+
+  document.querySelectorAll('#glass-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#glass-chips .filter-chip[data-val=""]').classList.add('active');
+  document.getElementById('fval-glass').textContent = 'Tous';
+  document.getElementById('fval-glass').classList.add('unset');
+
+  document.getElementById('fing-active-tag').style.display = 'none';
+  document.getElementById('fval-ing').textContent = 'Tous';
+  document.getElementById('fval-ing').classList.add('unset');
+
+  document.querySelectorAll('#frating-stars .star-btn[data-val]').forEach(btn => btn.classList.remove('on'));
+  document.getElementById('fval-rating').textContent = 'Toutes';
+  document.getElementById('fval-rating').classList.add('unset');
+
+  filterShake = '';
+  document.querySelectorAll('#fsec-shake .filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#fsec-shake .filter-chip[data-val=""]').classList.add('active');
+  document.getElementById('fval-shake').textContent = 'Peu importe';
+  document.getElementById('fval-shake').classList.add('unset');
+
+  document.getElementById('chip-makeable').classList.remove('active');
+
+  updateFilterBadge();
+  renderRecipes();
+}
+
+// ── Badge ──────────────────────────────────────────────────────────────────────
+function updateFilterBadge() {
+  const count = (_activeGlass ? 1 : 0) + (_activeIngId ? 1 : 0) + (_minRating ? 1 : 0) + (filterActive ? 1 : 0) + (filterShake ? 1 : 0);
+  const badge = document.getElementById('filter-count-badge');
+  const btn   = document.getElementById('filter-main-btn');
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = 'inline-block';
+    btn.classList.add('has-filters');
+  } else {
+    badge.style.display = 'none';
+    btn.classList.remove('has-filters');
+  }
 }
 
 // ─── INVENTORY STATE (global, recalculé à chaque changement) ─────────────────
 let _mySet = new Set();
-let _ingMap = {};
+let _ingMap = {};     // id -> name
+let _ingNameMap = {}; // name (lowercase) -> id (legacy fallback)
 
 async function refreshInventory() {
   const [allIngs, myIngs] = await Promise.all([txGetAll('ingredients'), txGetAll('myIngredients')]);
-  _ingMap = {};
-  allIngs.forEach(i => { _ingMap[i.name.toLowerCase()] = i.id; });
+  _ingMap = {}; // id -> name
+  _ingNameMap = {}; // name (lowercase) -> id  (legacy fallback)
+  allIngs.forEach(i => {
+    _ingMap[i.id] = i.name;
+    _ingNameMap[i.name.toLowerCase()] = i.id;
+  });
   _mySet = new Set(myIngs.map(i => i.id));
+}
+
+function resolveIngId(ing) {
+  // Préférer l'id stocké, sinon fallback par nom
+  if (ing.id) return ing.id;
+  if (ing.name) return _ingNameMap[ing.name.toLowerCase()];
+  return null;
+}
+function resolveIngName(ing) {
+  if (ing.id && _ingMap[ing.id]) return _ingMap[ing.id];
+  return ing.name || '?';
 }
 
 function isMakeable(r) {
   const ingOk = r.ingredients.every(ing => {
     if (ing.optional) return true;
-    const id = _ingMap[ing.name.toLowerCase()];
+    const id = resolveIngId(ing);
     return id && _mySet.has(id);
   });
   const toppingOk = (r.toppings || []).every(t => {
     if (t.optional) return true;
-    const id = _ingMap[t.name.toLowerCase()];
+    const id = resolveIngId(t);
     return id && _mySet.has(id);
   });
   return ingOk && toppingOk;
@@ -1352,18 +1925,24 @@ function isMakeable(r) {
 async function renderRecipes() {
   await refreshInventory();
   const filter = document.getElementById('recipe-filter').value.toLowerCase();
-  const glassFilter = document.getElementById('glass-filter').value;
   const recipes = await txGetAll('recipes');
 
   let filtered = recipes.filter(r => r.name.toLowerCase().includes(filter));
-  if (glassFilter) filtered = filtered.filter(r => r.glass === glassFilter);
+  if (_activeGlass)  filtered = filtered.filter(r => r.glass === _activeGlass);
+  if (_minRating)    filtered = filtered.filter(r => (r.rating || 0) >= _minRating);
+  if (_activeIngId)  filtered = filtered.filter(r =>
+    [...(r.ingredients || []), ...(r.toppings || [])].some(i => resolveIngId(i) === _activeIngId)
+  );
+  if (filterShake === 'yes')  filtered = filtered.filter(r => r.ingredients.some(i => i.shake));
+  if (filterShake === 'no')   filtered = filtered.filter(r => !r.ingredients.some(i => i.shake));
   filtered.sort((a,b) => a.name.localeCompare(b.name));
 
   if (filterActive) filtered = filtered.filter(isMakeable);
 
   const list = document.getElementById('recipes-list');
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty"><div class="icon">🍹</div><p>' + (filterActive ? 'Aucune recette réalisable' : 'Aucune recette') + '</p></div>';
+    const hasFilter = filterActive || _activeGlass || _activeIngId || _minRating || filterShake;
+    list.innerHTML = '<div class="empty"><div class="icon">🍹</div><p>' + (hasFilter ? 'Aucune recette correspond aux filtres' : 'Aucune recette') + '</p></div>';
     return;
   }
 
@@ -1374,21 +1953,22 @@ async function renderRecipes() {
     if (r.rating) metaItems.push(starsDisplay(r.rating));
 
     const ingRows = r.ingredients.map(ing => {
-      const id = _ingMap[ing.name.toLowerCase()];
+      const id = resolveIngId(ing);
       const have = id && _mySet.has(id);
+      const displayName = resolveIngName(ing);
       const flags = [
         ing.shake ? `<span class="flag-pill flag-shake">Shake</span>` : '',
         ing.optional ? `<span class="flag-pill flag-optional">Facultatif</span>` : ''
       ].filter(Boolean).join('');
       return `<div class="ing-row ${!have ? 'missing-ing' : ''}">
-        <span class="ing-name">${ing.name}${flags ? `<span class="ing-flags">${flags}</span>` : ''}</span>
+        <span class="ing-name">${displayName}${flags ? `<span class="ing-flags">${flags}</span>` : ''}</span>
         <span class="ing-qty">${ing.qty}</span>
       </div>`;
     }).join('');
 
     const toppingRows = (r.toppings && r.toppings.length) ? `
       <div class="topping-divider">Toppings</div>
-      ${r.toppings.map(t => { const tid = _ingMap[t.name.toLowerCase()]; const thave = tid && _mySet.has(tid); const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : ''; return `<div class="ing-row ${!thave ? 'missing-ing' : ''}"><span class="ing-name">${t.name}${f}</span><span class="ing-qty">${t.qty}</span></div>`; }).join('')}` : '';
+      ${r.toppings.map(t => { const tid = resolveIngId(t); const thave = tid && _mySet.has(tid); const dn = resolveIngName(t); const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : ''; return `<div class="ing-row ${!thave ? 'missing-ing' : ''}"><span class="ing-name">${dn}${f}</span><span class="ing-qty">${t.qty}</span></div>`; }).join('')}` : '';
 
     return `
       <div class="recipe-card ${makeable ? 'makeable' : ''}" id="rc-${r.id}">
@@ -1418,24 +1998,26 @@ function toggleCard(id) {
 
 // ─── MANAGE ───────────────────────────────────────────────────────────────────
 async function renderManageList() {
+  await refreshInventory();
   const recipes = await txGetAll('recipes');
   recipes.sort((a,b) => a.name.localeCompare(b.name));
   const list = document.getElementById('manage-recipes-list');
   if (!recipes.length) { list.innerHTML = '<div class="empty"><div class="icon">🍸</div><p>Aucune recette enregistrée</p></div>'; return; }
   list.innerHTML = recipes.map(r => {
     const ingRows = r.ingredients.map(ing => {
+      const displayName = resolveIngName(ing);
       const flags = [
         ing.shake ? `<span class="flag-pill flag-shake">Shake</span>` : '',
         ing.optional ? `<span class="flag-pill flag-optional">Facultatif</span>` : ''
       ].filter(Boolean).join('');
       return `<div class="ing-row">
-        <span class="ing-name">${ing.name}${flags ? `<span class="ing-flags">${flags}</span>` : ''}</span>
+        <span class="ing-name">${displayName}${flags ? `<span class="ing-flags">${flags}</span>` : ''}</span>
         <span class="ing-qty">${ing.qty}</span>
       </div>`;
     }).join('');
     const toppingRows = (r.toppings && r.toppings.length) ? `
       <div class="topping-divider">Toppings</div>
-      ${r.toppings.map(t => { const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : ''; return `<div class="ing-row"><span class="ing-name">${t.name}${f}</span><span class="ing-qty">${t.qty}</span></div>`; }).join('')}` : '';
+      ${r.toppings.map(t => { const dn = resolveIngName(t); const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : ''; return `<div class="ing-row"><span class="ing-name">${dn}${f}</span><span class="ing-qty">${t.qty}</span></div>`; }).join('')}` : '';
     return `
     <div class="recipe-card" id="mr-${r.id}">
       <div class="recipe-header" onclick="toggleMCard(${r.id})">
@@ -1501,17 +2083,25 @@ async function addFormIng(preset = null) {
     <div class="autocomplete-wrapper">
       <input type="text" placeholder="Ingrédient" class="ing-input" autocomplete="off"
         oninput="showAC(this)" onfocus="showAC(this)">
+      <input type="hidden" class="ing-id-input">
       <div class="autocomplete-dropdown" style="display:none"></div>
     </div>
-    <input type="text" placeholder="Quantité" class="qty-input">
-    <button type="button" class="ing-pill-toggle ${shake}" title="À shaker" onclick="this.classList.toggle('active-shake')">Shake</button>
+    <input type="text" placeholder="Quantit\u00e9" class="qty-input">
+    <button type="button" class="ing-pill-toggle ${shake}" title="\u00c0 shaker" onclick="this.classList.toggle('active-shake')">Shake</button>
     <button type="button" class="ing-pill-toggle ${optional}" title="Facultatif" onclick="this.classList.toggle('active-optional')">Facultatif</button>
-    <button class="remove-ing" onclick="this.closest('.form-ing-row').remove()">×</button>
+    <button class="remove-ing" onclick="this.closest('.form-ing-row').remove()">\u00d7</button>
   `;
   list.appendChild(row);
-  // Set values after appending (safe — no HTML injection)
   if (preset) {
-    row.querySelector('.ing-input').value = preset.name || '';
+    const ing = preset.id
+      ? _cachedIngs.find(i => i.id === preset.id)
+      : _cachedIngs.find(i => i.name === preset.name);
+    if (ing) {
+      row.querySelector('.ing-input').value = ing.name;
+      row.querySelector('.ing-id-input').value = ing.id;
+    } else if (preset.name) {
+      row.querySelector('.ing-input').value = preset.name;
+    }
     row.querySelector('.qty-input').value = preset.qty || '';
   }
 }
@@ -1526,42 +2116,54 @@ async function addFormTopping(preset = null) {
     <div class="autocomplete-wrapper">
       <input type="text" placeholder="Topping" class="ing-input" autocomplete="off"
         oninput="showAC(this)" onfocus="showAC(this)">
+      <input type="hidden" class="ing-id-input">
       <div class="autocomplete-dropdown" style="display:none"></div>
     </div>
-    <input type="text" placeholder="Quantité" class="qty-input">
+    <input type="text" placeholder="Quantit\u00e9" class="qty-input">
     <button type="button" class="ing-pill-toggle ${optional}" title="Facultatif" onclick="this.classList.toggle('active-optional')">Facultatif</button>
-    <button class="remove-ing" onclick="this.closest('.form-ing-row').remove()">×</button>
+    <button class="remove-ing" onclick="this.closest('.form-ing-row').remove()">\u00d7</button>
   `;
   list.appendChild(row);
   if (preset) {
-    row.querySelector('.ing-input').value = preset.name || '';
+    const ing = preset.id
+      ? _cachedIngs.find(i => i.id === preset.id)
+      : _cachedIngs.find(i => i.name === preset.name);
+    if (ing) {
+      row.querySelector('.ing-input').value = ing.name;
+      row.querySelector('.ing-id-input').value = ing.id;
+    } else if (preset.name) {
+      row.querySelector('.ing-input').value = preset.name;
+    }
     row.querySelector('.qty-input').value = preset.qty || '';
   }
 }
 
 function showAC(input) {
   const val = input.value.toLowerCase().trim();
-  const dropdown = input.nextElementSibling;
-  const names = _cachedIngNames;
+  const dropdown = input.parentElement.querySelector('.autocomplete-dropdown');
+  const ings = _cachedIngs;
   const matches = val
-    ? names.filter(n => n.toLowerCase().includes(val)).slice(0, 10)
-    : names.slice().sort((a,b) => a.localeCompare(b)).slice(0, 14);
+    ? ings.filter(i => i.name.toLowerCase().includes(val)).slice(0, 10)
+    : ings.slice().sort((a,b) => a.name.localeCompare(b.name)).slice(0, 14);
   if (!matches.length) { dropdown.style.display = 'none'; return; }
-  dropdown.innerHTML = matches.map(n => {
-    let label = n;
+  dropdown.innerHTML = matches.map(i => {
+    let label = i.name;
     if (val) {
-      const idx = n.toLowerCase().indexOf(val);
-      if (idx >= 0) label = n.slice(0, idx) + `<strong style="color:var(--gold-light)">${n.slice(idx, idx + val.length)}</strong>` + n.slice(idx + val.length);
+      const idx = i.name.toLowerCase().indexOf(val);
+      if (idx >= 0) label = i.name.slice(0, idx) + `<strong style="color:var(--gold-light)">${i.name.slice(idx, idx + val.length)}</strong>` + i.name.slice(idx + val.length);
     }
     return `<div onmousedown="selectAC(this)">${label}</div>`;
   }).join('');
-  // Store real name as data attribute to avoid parsing HTML
-  dropdown.querySelectorAll('div').forEach((el, i) => el.dataset.name = matches[i]);
+  dropdown.querySelectorAll('div').forEach((el, i) => {
+    el.dataset.name = matches[i].name;
+    el.dataset.id = matches[i].id;
+  });
   dropdown.style.display = 'block';
 }
 function selectAC(el) {
   const wrapper = el.closest('.autocomplete-wrapper');
-  wrapper.querySelector('input').value = el.dataset.name;
+  wrapper.querySelector('.ing-input').value = el.dataset.name;
+  wrapper.querySelector('.ing-id-input').value = el.dataset.id;
   el.closest('.autocomplete-dropdown').style.display = 'none';
 }
 document.addEventListener('click', e => {
@@ -1577,21 +2179,34 @@ async function saveRecipe() {
   const ingredients = [];
   rows.forEach(row => {
     const n = row.querySelector('.ing-input').value.trim();
+    const idVal = row.querySelector('.ing-id-input').value.trim();
     const q = row.querySelector('.qty-input').value.trim();
     if (n) {
       const shake = row.querySelector('.ing-pill-toggle.active-shake') ? true : false;
       const optional = row.querySelector('.ing-pill-toggle.active-optional') ? true : false;
-      ingredients.push({ name: n, qty: q || '', shake, optional });
+      const ingId = idVal ? parseInt(idVal) : null;
+      if (ingId) {
+        ingredients.push({ id: ingId, qty: q || '', shake, optional });
+      } else {
+        // ingrédient non trouvé dans le catalogue — on garde le nom en fallback
+        ingredients.push({ name: n, qty: q || '', shake, optional });
+      }
     }
   });
   const toppingRows = document.querySelectorAll('#form-topping-list .form-ing-row');
   const toppings = [];
   toppingRows.forEach(row => {
     const n = row.querySelector('.ing-input').value.trim();
+    const idVal = row.querySelector('.ing-id-input').value.trim();
     const q = row.querySelector('.qty-input').value.trim();
     if (n) {
       const optional = row.querySelector('.ing-pill-toggle.active-optional') ? true : false;
-      toppings.push({ name: n, qty: q || '', optional });
+      const ingId = idVal ? parseInt(idVal) : null;
+      if (ingId) {
+        toppings.push({ id: ingId, qty: q || '', optional });
+      } else {
+        toppings.push({ name: n, qty: q || '', optional });
+      }
     }
   });
   const glass = document.getElementById('recipe-glass').value;
@@ -1656,7 +2271,6 @@ function showSetupModal() {
   if (cfg) {
     document.getElementById('cfg-owner').value = cfg.owner || '';
     document.getElementById('cfg-repo').value = cfg.repo || '';
-    document.getElementById('cfg-path').value = cfg.path || 'cocktails.json';
     document.getElementById('cfg-token').value = cfg.token || '';
   }
   document.getElementById('setup-modal').style.display = 'flex';
@@ -1665,7 +2279,6 @@ function showSetupModal() {
 async function submitSetup() {
   const owner = document.getElementById('cfg-owner').value.trim();
   const repo  = document.getElementById('cfg-repo').value.trim();
-  const path  = document.getElementById('cfg-path').value.trim() || 'cocktails.json';
   const token = document.getElementById('cfg-token').value.trim();
   const errEl = document.getElementById('setup-error');
   errEl.style.display = 'none';
@@ -1676,12 +2289,11 @@ async function submitSetup() {
     return;
   }
 
-  _ghConfig = { owner, repo, path, token };
+  _ghConfig = { owner, repo, token };
 
   // Test de connexion
   showLoading(true);
   try {
-    // Vérifier que le repo est accessible
     await ghRequest('GET', `/repos/${owner}/${repo}`);
     saveConfig(_ghConfig);
     document.getElementById('setup-modal').style.display = 'none';
