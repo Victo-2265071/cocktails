@@ -4,22 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Le Bar — Cocktails</title>
-
-<!-- Web App / PWA Icons -->
-<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-<link rel="manifest" href="manifest.json">
-
-<!-- iOS Web App Meta -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Le Bar">
-
-<!-- Android / General -->
-<meta name="theme-color" content="#0a0905">
-<meta name="application-name" content="Le Bar">
-
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -919,9 +906,9 @@
       font-size: 1.6rem;
     }
 
-    /* Ingredient grid: 2 colonnes sur mobile */
+    /* Ingredient grid: 1 colonne sur mobile */
     .ingredients-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr;
       gap: 8px;
     }
     .ingredient-item {
@@ -966,10 +953,20 @@
     .recipe-header .rname {
       font-size: 1.25rem;
     }
-    .recipe-header .badge {
-      font-size: 0.65rem;
-      padding: 3px 8px;
+    /* Verre + étoiles empilés verticalement sur mobile */
+    .recipe-header .recipe-meta-wrap {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
     }
+    /* Badge: icône uniquement sur mobile */
+    .recipe-header .badge {
+      font-size: 0;
+      padding: 5px 7px;
+      line-height: 1;
+    }
+    .recipe-header .badge.ok::before  { content: '✓'; font-size: 0.85rem; color: #6dbd8a; }
+    .recipe-header .badge.missing::before { content: '✕'; font-size: 0.85rem; color: #e07060; }
     .recipe-body {
       padding: 0 16px 14px;
     }
@@ -1034,6 +1031,77 @@
       text-align: center;
     }
   }
+
+  /* ─── FAVOURITE STAR ────────────────────────────────────────────────────── */
+  .fav-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.4rem; line-height: 1;
+    color: var(--border);
+    padding: 0 4px 0 0;
+    flex-shrink: 0;
+    transition: color 0.2s, transform 0.15s;
+  }
+  .fav-btn:hover { transform: scale(1.2); }
+  .fav-btn.on { color: var(--gold); }
+
+  /* ─── TAGS ──────────────────────────────────────────────────────────────── */
+  .tag-btn-wrap { position: relative; margin-bottom: 16px; }
+  .tag-toggle-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-muted);
+    font-family: 'Josefin Sans', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 11px 16px; cursor: pointer; transition: all 0.2s;
+    width: 100%;
+  }
+  .tag-toggle-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+  .tag-toggle-btn.has-tags { border-color: var(--gold-dim); color: var(--gold); }
+  .tag-count-badge {
+    background: var(--gold); color: var(--bg); font-size: 0.65rem;
+    font-weight: 700; border-radius: 999px; padding: 1px 6px;
+    min-width: 18px; text-align: center;
+  }
+  .tag-panel {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: var(--surface2); border: 1px solid var(--gold-dim);
+    border-radius: 6px; z-index: 400; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    max-height: 420px; overflow-y: auto;
+  }
+  .tag-section { padding: 12px 16px 10px; }
+  .tag-section + .tag-section { border-top: 1px solid var(--border); }
+  .tag-section-label {
+    font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .tag-section-limit { font-size: 0.65rem; opacity: 0.6; }
+  .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag-chip {
+    background: none; border: 1px solid var(--border); border-radius: 3px;
+    color: var(--text-muted); font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.75rem; letter-spacing: 0.08em; padding: 5px 10px;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .tag-chip:hover { border-color: var(--gold-dim); color: var(--text); }
+  .tag-chip.active { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,0.1); }
+  .tag-chip.disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Tag pills displayed on recipe cards */
+  .recipe-tags {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    padding: 0 20px 10px;
+  }
+  .recipe-tag-pill {
+    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 2px;
+    border: 1px solid var(--border); color: var(--text-muted);
+    background: rgba(255,255,255,0.02);
+  }
+  .recipe-tag-pill.profil { border-color: rgba(201,168,76,0.3); color: rgba(201,168,76,0.7); }
+  .recipe-tag-pill.texture { border-color: rgba(74,140,180,0.3); color: rgba(100,170,210,0.7); }
+  .recipe-tag-pill.sucre { border-color: rgba(180,120,74,0.3); color: rgba(210,150,100,0.7); }
+  .recipe-tag-pill.complexite { border-color: rgba(140,100,180,0.3); color: rgba(170,130,210,0.7); }
 
   /* Medium: tablet adjustments */
   @media (min-width: 601px) and (max-width: 900px) {
@@ -1171,9 +1239,56 @@
         </div>
         <div class="filter-panel-divider"></div>
 
+        <!-- Tags -->
+        <div class="frow" onclick="toggleFSection('fsec-tags')">
+          <span class="frow-label">Tags</span>
+          <span class="frow-val unset" id="fval-tags">Tous</span>
+          <span class="frow-arrow" id="farr-tags">›</span>
+        </div>
+        <div class="fsection" id="fsec-tags" style="display:none">
+          <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin:6px 0 5px;">Profil</div>
+          <div class="filter-chips" id="ftags-profil">
+            <button class="filter-chip" data-tag="Sucré" onclick="toggleFilterTag(this)">Sucré</button>
+            <button class="filter-chip" data-tag="Sec" onclick="toggleFilterTag(this)">Sec</button>
+            <button class="filter-chip" data-tag="Amer" onclick="toggleFilterTag(this)">Amer</button>
+            <button class="filter-chip" data-tag="Acide / Sour" onclick="toggleFilterTag(this)">Acide / Sour</button>
+            <button class="filter-chip" data-tag="Fruité" onclick="toggleFilterTag(this)">Fruité</button>
+            <button class="filter-chip" data-tag="Herbacé" onclick="toggleFilterTag(this)">Herbacé</button>
+            <button class="filter-chip" data-tag="Épicé" onclick="toggleFilterTag(this)">Épicé</button>
+            <button class="filter-chip" data-tag="Florale" onclick="toggleFilterTag(this)">Florale</button>
+            <button class="filter-chip" data-tag="Boisé" onclick="toggleFilterTag(this)">Boisé</button>
+            <button class="filter-chip" data-tag="Caramélisé" onclick="toggleFilterTag(this)">Caramélisé</button>
+            <button class="filter-chip" data-tag="Café / Chocolaté" onclick="toggleFilterTag(this)">Café / Chocolaté</button>
+          </div>
+          <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin:10px 0 5px;">Texture</div>
+          <div class="filter-chips" id="ftags-texture">
+            <button class="filter-chip" data-tag="Crémeux" onclick="toggleFilterTag(this)">Crémeux</button>
+            <button class="filter-chip" data-tag="Onctueux" onclick="toggleFilterTag(this)">Onctueux</button>
+            <button class="filter-chip" data-tag="Léger" onclick="toggleFilterTag(this)">Léger</button>
+            <button class="filter-chip" data-tag="Sirupeux" onclick="toggleFilterTag(this)">Sirupeux</button>
+            <button class="filter-chip" data-tag="Pétillant" onclick="toggleFilterTag(this)">Pétillant</button>
+          </div>
+          <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin:10px 0 5px;">Sucre</div>
+          <div class="filter-chips" id="ftags-sucre">
+            <button class="filter-chip" data-tag="Très sucré" onclick="toggleFilterTag(this)">Très sucré</button>
+            <button class="filter-chip" data-tag="Sucré" onclick="toggleFilterTag(this)">Sucré</button>
+            <button class="filter-chip" data-tag="Équilibré" onclick="toggleFilterTag(this)">Équilibré</button>
+            <button class="filter-chip" data-tag="Peu sucré" onclick="toggleFilterTag(this)">Peu sucré</button>
+            <button class="filter-chip" data-tag="Non-sucré" onclick="toggleFilterTag(this)">Non-sucré</button>
+          </div>
+          <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin:10px 0 5px;">Complexité</div>
+          <div class="filter-chips" id="ftags-complexite">
+            <button class="filter-chip" data-tag="Simple" onclick="toggleFilterTag(this)">Simple</button>
+            <button class="filter-chip" data-tag="Intermédiaire" onclick="toggleFilterTag(this)">Intermédiaire</button>
+            <button class="filter-chip" data-tag="Complexe" onclick="toggleFilterTag(this)">Complexe</button>
+          </div>
+        </div>
+        <div class="filter-panel-divider"></div>
+
         <!-- Booleans -->
         <div class="filter-panel-section" style="padding-top:10px;padding-bottom:10px;">
           <div class="filter-chips">
+            <button class="filter-chip" id="chip-favorites" onclick="toggleFilterChip(this,'favorites')">★ Favoris</button>
             <button class="filter-chip" id="chip-makeable" onclick="toggleFilterChip(this,'makeable')">✓ Réalisables</button>
           </div>
         </div>
@@ -1230,6 +1345,66 @@
     <div class="form-group">
       <label>Notes personnelles</label>
       <textarea id="recipe-notes" placeholder="Conseils, variantes, anecdotes…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Tags</label>
+      <div class="tag-btn-wrap" id="form-tag-wrap">
+        <button type="button" class="tag-toggle-btn" id="form-tag-toggle-btn" onclick="toggleTagPanel()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><path d="M1 6.5h11M6.5 1v11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span id="form-tag-btn-label">Ajouter des tags</span>
+          <span class="tag-count-badge" id="form-tag-count" style="display:none"></span>
+        </button>
+        <div class="tag-panel" id="form-tag-panel" style="display:none">
+          <!-- Profil -->
+          <div class="tag-section">
+            <div class="tag-section-label">Profil <span class="tag-section-limit">0 à 3</span></div>
+            <div class="tag-chips" id="tag-chips-profil">
+              <button type="button" class="tag-chip" data-section="profil" data-val="Sucré" onclick="toggleTag(this)">Sucré</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Sec" onclick="toggleTag(this)">Sec</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Amer" onclick="toggleTag(this)">Amer</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Acide / Sour" onclick="toggleTag(this)">Acide / Sour</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Fruité" onclick="toggleTag(this)">Fruité</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Herbacé" onclick="toggleTag(this)">Herbacé</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Épicé" onclick="toggleTag(this)">Épicé</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Florale" onclick="toggleTag(this)">Florale</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Boisé" onclick="toggleTag(this)">Boisé</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Caramélisé" onclick="toggleTag(this)">Caramélisé</button>
+              <button type="button" class="tag-chip" data-section="profil" data-val="Café / Chocolaté" onclick="toggleTag(this)">Café / Chocolaté</button>
+            </div>
+          </div>
+          <!-- Texture -->
+          <div class="tag-section">
+            <div class="tag-section-label">Texture <span class="tag-section-limit">0 ou 1</span></div>
+            <div class="tag-chips" id="tag-chips-texture">
+              <button type="button" class="tag-chip" data-section="texture" data-val="Crémeux" onclick="toggleTag(this)">Crémeux</button>
+              <button type="button" class="tag-chip" data-section="texture" data-val="Onctueux" onclick="toggleTag(this)">Onctueux</button>
+              <button type="button" class="tag-chip" data-section="texture" data-val="Léger" onclick="toggleTag(this)">Léger</button>
+              <button type="button" class="tag-chip" data-section="texture" data-val="Sirupeux" onclick="toggleTag(this)">Sirupeux</button>
+              <button type="button" class="tag-chip" data-section="texture" data-val="Pétillant" onclick="toggleTag(this)">Pétillant</button>
+            </div>
+          </div>
+          <!-- Sucre -->
+          <div class="tag-section">
+            <div class="tag-section-label">Sucre <span class="tag-section-limit">0 ou 1</span></div>
+            <div class="tag-chips" id="tag-chips-sucre">
+              <button type="button" class="tag-chip" data-section="sucre" data-val="Très sucré" onclick="toggleTag(this)">Très sucré</button>
+              <button type="button" class="tag-chip" data-section="sucre" data-val="Sucré" onclick="toggleTag(this)">Sucré</button>
+              <button type="button" class="tag-chip" data-section="sucre" data-val="Équilibré" onclick="toggleTag(this)">Équilibré</button>
+              <button type="button" class="tag-chip" data-section="sucre" data-val="Peu sucré" onclick="toggleTag(this)">Peu sucré</button>
+              <button type="button" class="tag-chip" data-section="sucre" data-val="Non-sucré" onclick="toggleTag(this)">Non-sucré</button>
+            </div>
+          </div>
+          <!-- Complexité -->
+          <div class="tag-section">
+            <div class="tag-section-label">Complexité <span class="tag-section-limit">0 ou 1</span></div>
+            <div class="tag-chips" id="tag-chips-complexite">
+              <button type="button" class="tag-chip" data-section="complexite" data-val="Simple" onclick="toggleTag(this)">Simple</button>
+              <button type="button" class="tag-chip" data-section="complexite" data-val="Intermédiaire" onclick="toggleTag(this)">Intermédiaire</button>
+              <button type="button" class="tag-chip" data-section="complexite" data-val="Complexe" onclick="toggleTag(this)">Complexe</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="form-group">
       <label>Ingrédients</label>
@@ -1735,6 +1910,153 @@ async function renameIng(id, newName) {
 let _activeGlass   = '';
 let _activeIngId   = null;  // id de l'ingrédient filtré
 let _minRating     = 0;
+let _activeFilterTags = new Set(); // tags actifs dans le filtre
+let filterFavorites = false;
+
+// ─── FAVOURITES ───────────────────────────────────────────────────────────────
+async function toggleFavorite(id, event) {
+  event.stopPropagation();
+  const recipes = _dbRec.recipes;
+  const r = recipes.find(r => r.id === id);
+  if (!r) return;
+  r.favorite = !r.favorite;
+  await persistRecipes('favori recette #' + id);
+  renderRecipes();
+}
+
+// ─── TAG PANEL (formulaire) ───────────────────────────────────────────────────
+const TAG_LIMITS = { profil: 3, texture: 1, sucre: 1, complexite: 1 };
+let _formTags = { profil: [], texture: [], sucre: [], complexite: [] };
+
+function toggleTagPanel() {
+  const panel = document.getElementById('form-tag-panel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#form-tag-wrap')) {
+    const p = document.getElementById('form-tag-panel');
+    if (p) p.style.display = 'none';
+  }
+});
+
+function toggleTag(btn) {
+  const section = btn.dataset.section;
+  const val = btn.dataset.val;
+  const limit = TAG_LIMITS[section] || 1;
+  const arr = _formTags[section];
+  const isActive = arr.includes(val);
+
+  if (isActive) {
+    // Toujours permettre la désélection
+    _formTags[section] = arr.filter(v => v !== val);
+  } else {
+    // Seulement ajouter si la limite n'est pas atteinte
+    if (arr.length < limit) {
+      _formTags[section] = [...arr, val];
+    }
+    // Si limite atteinte, on ne fait rien (le chip reste disabled)
+  }
+  updateTagBtnUI();
+  updateTagChipStates();
+}
+
+function updateTagBtnUI() {
+  const total = Object.values(_formTags).flat().length;
+  const btn = document.getElementById('form-tag-toggle-btn');
+  const badge = document.getElementById('form-tag-count');
+  const label = document.getElementById('form-tag-btn-label');
+  if (total > 0) {
+    btn.classList.add('has-tags');
+    badge.style.display = '';
+    badge.textContent = total;
+    label.textContent = 'Tags sélectionnés';
+  } else {
+    btn.classList.remove('has-tags');
+    badge.style.display = 'none';
+    label.textContent = 'Ajouter des tags';
+  }
+}
+
+function updateTagChipStates() {
+  // dim chips that are at limit
+  Object.keys(TAG_LIMITS).forEach(section => {
+    const limit = TAG_LIMITS[section];
+    const arr = _formTags[section];
+    document.querySelectorAll(`#tag-chips-${section} .tag-chip`).forEach(chip => {
+      const isActive = arr.includes(chip.dataset.val);
+      chip.classList.toggle('active', isActive);
+      chip.classList.toggle('disabled', !isActive && arr.length >= limit);
+    });
+  });
+}
+
+function resetFormTags() {
+  _formTags = { profil: [], texture: [], sucre: [], complexite: [] };
+  document.querySelectorAll('.tag-chip').forEach(c => { c.classList.remove('active', 'disabled'); });
+  updateTagBtnUI();
+}
+
+function loadTagsIntoForm(tags) {
+  resetFormTags();
+  if (!tags) return;
+  Object.keys(tags).forEach(section => {
+    if (!_formTags[section]) return;
+    (tags[section] || []).forEach(val => {
+      _formTags[section].push(val);
+      const btn = document.querySelector(`#tag-chips-${section} .tag-chip[data-val="${CSS.escape(val)}"]`);
+      if (btn) btn.classList.add('active');
+    });
+  });
+  updateTagBtnUI();
+  updateTagChipStates();
+}
+
+// ─── TAG FILTER ───────────────────────────────────────────────────────────────
+function toggleFilterTag(btn) {
+  const tag = btn.dataset.tag;
+  if (_activeFilterTags.has(tag)) {
+    _activeFilterTags.delete(tag);
+    btn.classList.remove('active');
+  } else {
+    _activeFilterTags.add(tag);
+    btn.classList.add('active');
+  }
+  const count = _activeFilterTags.size;
+  const fval = document.getElementById('fval-tags');
+  if (count === 0) { fval.textContent = 'Tous'; fval.classList.add('unset'); }
+  else { fval.textContent = count + ' tag' + (count > 1 ? 's' : ''); fval.classList.remove('unset'); }
+  updateFilterBadge();
+  renderRecipes();
+}
+
+function resetTagFilters() {
+  _activeFilterTags.clear();
+  document.querySelectorAll('[id^="ftags-"] .filter-chip').forEach(c => c.classList.remove('active'));
+  const fval = document.getElementById('fval-tags');
+  fval.textContent = 'Tous'; fval.classList.add('unset');
+}
+
+// helper: all tags of a recipe as flat array
+function recipeAllTags(r) {
+  if (!r.tags) return [];
+  return Object.values(r.tags).flat();
+}
+
+// render tag pills for a recipe
+function renderTagPills(r, cardPrefix) {
+  if (!r.tags) return '';
+  const SECTION_CLASS = { profil: 'profil', texture: 'texture', sucre: 'sucre', complexite: 'complexite' };
+  const pills = [];
+  Object.entries(r.tags).forEach(([sec, vals]) => {
+    (vals || []).forEach(v => {
+      pills.push(`<span class="recipe-tag-pill ${SECTION_CLASS[sec] || ''}">${v}</span>`);
+    });
+  });
+  const toggleFn = cardPrefix === 'mr' ? `toggleMCard(${r.id})` : `toggleCard(${r.id})`;
+  return pills.length ? `<div class="recipe-tags" onclick="${toggleFn}" style="cursor:pointer;">${pills.join('')}</div>` : '';
+}
 
 function toggleFilterPanel() {
   const panel = document.getElementById('filter-panel');
@@ -1854,7 +2176,12 @@ function selectShake(btn) {
 
 // ── Booleans (makeable seulement désormais) ───────────────────────────────────
 function toggleFilterChip(btn, type) {
-  if (type === 'makeable') {
+  if (type === 'favorites') {
+    filterFavorites = !filterFavorites;
+    btn.classList.toggle('active', filterFavorites);
+    updateFilterBadge();
+    renderRecipes();
+  } else if (type === 'makeable') {
     filterActive = !filterActive;
     btn.classList.toggle('active', filterActive);
     updateFilterBadge();
@@ -1869,7 +2196,10 @@ function resetFilters() {
   _minRating = 0;
   filterActive = false;
   filterShake = false;
+  filterFavorites = false;
 
+  document.getElementById('chip-favorites').classList.remove('active');
+  document.getElementById('chip-makeable').classList.remove('active');
   document.querySelectorAll('#glass-chips .filter-chip').forEach(c => c.classList.remove('active'));
   document.querySelector('#glass-chips .filter-chip[data-val=""]').classList.add('active');
   document.getElementById('fval-glass').textContent = 'Tous';
@@ -1889,7 +2219,7 @@ function resetFilters() {
   document.getElementById('fval-shake').textContent = 'Peu importe';
   document.getElementById('fval-shake').classList.add('unset');
 
-  document.getElementById('chip-makeable').classList.remove('active');
+  resetTagFilters();
 
   updateFilterBadge();
   renderRecipes();
@@ -1897,7 +2227,7 @@ function resetFilters() {
 
 // ── Badge ──────────────────────────────────────────────────────────────────────
 function updateFilterBadge() {
-  const count = (_activeGlass ? 1 : 0) + (_activeIngId ? 1 : 0) + (_minRating ? 1 : 0) + (filterActive ? 1 : 0) + (filterShake ? 1 : 0);
+  const count = (_activeGlass ? 1 : 0) + (_activeIngId ? 1 : 0) + (_minRating ? 1 : 0) + (filterActive ? 1 : 0) + (filterShake ? 1 : 0) + (_activeFilterTags.size > 0 ? 1 : 0) + (filterFavorites ? 1 : 0);
   const badge = document.getElementById('filter-count-badge');
   const btn   = document.getElementById('filter-main-btn');
   if (count > 0) {
@@ -1964,13 +2294,24 @@ async function renderRecipes() {
   );
   if (filterShake === 'yes')  filtered = filtered.filter(r => r.ingredients.some(i => i.shake));
   if (filterShake === 'no')   filtered = filtered.filter(r => !r.ingredients.some(i => i.shake));
-  filtered.sort((a,b) => a.name.localeCompare(b.name));
-
+  if (_activeFilterTags.size > 0) {
+    filtered = filtered.filter(r => {
+      const allTags = recipeAllTags(r);
+      return [..._activeFilterTags].every(t => allTags.includes(t));
+    });
+  }
   if (filterActive) filtered = filtered.filter(isMakeable);
+  if (filterFavorites) filtered = filtered.filter(r => r.favorite);
+
+  // Trier : favoris en premier, puis alphabétique
+  filtered.sort((a, b) => {
+    if (!!b.favorite !== !!a.favorite) return b.favorite ? 1 : -1;
+    return a.name.localeCompare(b.name);
+  });
 
   const list = document.getElementById('recipes-list');
   if (!filtered.length) {
-    const hasFilter = filterActive || _activeGlass || _activeIngId || _minRating || filterShake;
+    const hasFilter = filterActive || filterFavorites || _activeGlass || _activeIngId || _minRating || filterShake || _activeFilterTags.size > 0;
     list.innerHTML = '<div class="empty"><div class="icon">🍹</div><p>' + (hasFilter ? 'Aucune recette correspond aux filtres' : 'Aucune recette') + '</p></div>';
     return;
   }
@@ -1999,14 +2340,27 @@ async function renderRecipes() {
       <div class="topping-divider">Toppings</div>
       ${r.toppings.map(t => { const tid = resolveIngId(t); const thave = tid && _mySet.has(tid); const dn = resolveIngName(t); const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : ''; return `<div class="ing-row ${!thave ? 'missing-ing' : ''}"><span class="ing-name">${dn}${f}</span><span class="ing-qty">${t.qty}</span></div>`; }).join('')}` : '';
 
+    const missingIngs = [...(r.ingredients || []), ...(r.toppings || [])].filter(ing => {
+      if (ing.optional) return false;
+      const id = resolveIngId(ing);
+      return !(id && _mySet.has(id));
+    });
+    const badgeLabel = makeable
+      ? '✓ Réalisable'
+      : missingIngs.length === 1
+        ? `Manque : ${resolveIngName(missingIngs[0])}`
+        : 'Manque des ingrédients';
+
     return `
       <div class="recipe-card ${makeable ? 'makeable' : ''}" id="rc-${r.id}">
         <div class="recipe-header" onclick="toggleCard(${r.id})">
+          <button class="fav-btn ${r.favorite ? 'on' : ''}" onclick="toggleFavorite(${r.id}, event)" title="${r.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">★</button>
           <span class="rname">${r.name}</span>
-          ${metaItems.length ? '<span style="display:flex;align-items:center;gap:10px;">' + metaItems.join('') + '</span>' : ''}
-          <span class="badge ${makeable ? 'ok' : 'missing'}">${makeable ? '✓ Réalisable' : 'Manque des ingrédients'}</span>
+          ${metaItems.length ? '<span class="recipe-meta-wrap" style="display:flex;align-items:center;gap:10px;">' + metaItems.join('') + '</span>' : ''}
+          <span class="badge ${makeable ? 'ok' : 'missing'}">${badgeLabel}</span>
           <span class="arrow">▼</span>
         </div>
+        ${renderTagPills(r, 'rc')}
         <div class="recipe-body">
           <div class="ingredients-list">
             ${ingRows}
@@ -2058,6 +2412,7 @@ async function renderManageList() {
         <span style="font-size:0.65rem;letter-spacing:0.1em;color:var(--text-muted)">${r.ingredients.length} ingrédient${r.ingredients.length !== 1 ? 's' : ''}</span>
         <span class="arrow">▼</span>
       </div>
+      ${renderTagPills(r, 'mr')}
       <div class="recipe-body">
         <div class="ingredients-list">
           ${ingRows}
@@ -2083,6 +2438,7 @@ function startNew() {
   document.getElementById('recipe-notes').value = '';
   document.getElementById('form-title').textContent = 'Nouvelle recette';
   setRating(0);
+  resetFormTags();
   renderFormIngs([], []);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2241,12 +2597,13 @@ async function saveRecipe() {
   const glass = document.getElementById('recipe-glass').value;
   const rating = parseInt(document.getElementById('recipe-rating').value) || 0;
   const notes = document.getElementById('recipe-notes').value.trim();
+  const tags = { profil: [..._formTags.profil], texture: [..._formTags.texture], sucre: [..._formTags.sucre], complexite: [..._formTags.complexite] };
   const editId = document.getElementById('edit-id').value;
   if (editId) {
-    await txPut('recipes', { id: parseInt(editId), name, ingredients, toppings, glass, rating, notes });
+    await txPut('recipes', { id: parseInt(editId), name, ingredients, toppings, glass, rating, notes, tags });
     toast('Recette mise à jour');
   } else {
-    await txAdd('recipes', { name, ingredients, toppings, glass, rating, notes });
+    await txAdd('recipes', { name, ingredients, toppings, glass, rating, notes, tags });
     toast('Recette enregistrée');
   }
   startNew();
@@ -2262,6 +2619,7 @@ async function editRecipe(id) {
   document.getElementById('recipe-notes').value = r.notes || '';
   document.getElementById('form-title').textContent = 'Modifier — ' + r.name;
   setRating(r.rating || 0);
+  loadTagsIntoForm(r.tags || null);
   renderFormIngs(r.ingredients, r.toppings || []);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
