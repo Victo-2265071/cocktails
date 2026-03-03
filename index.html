@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Le Bar — Cocktails</title>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
@@ -74,16 +74,15 @@
     display: flex;
     justify-content: center;
     gap: 0;
-    padding: 32px 24px 0;
+    padding: 0 24px;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 200;
     background: var(--bg);
-    transition: padding 0.3s, box-shadow 0.3s;
+    transition: box-shadow 0.3s;
   }
   .tabs.scrolled {
-    padding-top: 0;
     box-shadow: 0 4px 24px rgba(0,0,0,0.55);
   }
   .tab-btn {
@@ -203,45 +202,78 @@
     letter-spacing: 0.08em;
     flex: 1;
     text-transform: uppercase;
-    padding-right: 40px; /* espace pour les boutons flottants */
   }
-  .ingredient-item .del-ing {
+  .ing-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 2px;
+    flex-shrink: 0;
     opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  .ingredient-item:hover .ing-menu-btn { opacity: 1; }
+  .ing-menu-btn:hover { color: var(--gold); }
+  .ing-menu-btn.open { opacity: 1; color: var(--gold); }
+
+  /* Toujours visible sur mobile */
+  @media (hover: none) {
+    .ing-menu-btn { opacity: 1; }
+  }
+
+  .ing-menu-popup {
     position: absolute;
-    top: 4px;
+    top: calc(100% + 4px);
     right: 4px;
     background: var(--surface2);
-    border: none;
-    color: var(--red);
-    cursor: pointer;
-    font-size: 0.9rem;
-    width: 20px; height: 20px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 2px;
-    line-height: 1;
-    transition: opacity 0.2s;
-    z-index: 1;
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--radius);
+    z-index: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    min-width: 140px;
+    overflow: hidden;
   }
-  .ingredient-item:hover .del-ing { opacity: 1; }
-
-  .ingredient-item .edit-ing {
-    opacity: 0;
-    position: absolute;
-    top: 4px;
-    right: 26px;
-    background: var(--surface2);
+  .ing-menu-popup button {
+    display: block;
+    width: 100%;
+    background: none;
     border: none;
-    color: var(--gold-dim);
+    color: var(--text);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 11px 16px;
     cursor: pointer;
-    font-size: 0.9rem;
-    width: 20px; height: 20px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 2px;
-    line-height: 1;
-    transition: opacity 0.2s;
-    z-index: 1;
+    text-align: left;
+    transition: background 0.15s;
   }
-  .ingredient-item:hover .edit-ing { opacity: 1; }
+  .ing-menu-popup button:hover { background: rgba(201,168,76,0.08); }
+  .ing-menu-popup button.danger { color: var(--red); }
+  .ing-menu-popup .ing-rename-wrap {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+  .ing-menu-popup .ing-rename-wrap.open { display: block; }
+  .ing-menu-popup .ing-rename-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    padding: 7px 10px;
+    outline: none;
+  }
 
   .ing-edit-input {
     flex: 1;
@@ -415,9 +447,8 @@
     letter-spacing: 0.08em;
   }
   .ing-row:last-child { border-bottom: none; }
-  .ing-row .ing-name { text-transform: uppercase; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .ing-row .ing-qty { color: var(--gold); font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
-  .ing-row.missing-ing .ing-name { color: var(--text-muted); text-decoration: line-through; }
+  .ing-row .ing-name { text-transform: uppercase; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; flex: 1; }
+  .ing-row .ing-qty { color: var(--gold); font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; white-space: nowrap; flex-shrink: 0; margin-left: 8px; }
 
   .recipe-actions {
     display: flex;
@@ -469,6 +500,7 @@
   .form-group input::placeholder { color: var(--text-muted); }
 
   .form-ing-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .form-ing-wrapper { display: flex; flex-direction: column; }
   .form-ing-row {
     display: flex;
     gap: 8px;
@@ -478,8 +510,8 @@
   .form-ing-row input:last-of-type { flex: 1; }
   .form-ing-row .remove-ing {
     background: none;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
+    border: 1px solid var(--red);
+    color: var(--red);
     width: 36px; height: 36px;
     border-radius: var(--radius);
     cursor: pointer;
@@ -488,7 +520,7 @@
     flex-shrink: 0;
     transition: all 0.2s;
   }
-  .form-ing-row .remove-ing:hover { border-color: var(--red); color: var(--red); }
+  .form-ing-row .remove-ing:hover { background: rgba(192,74,58,0.12); }
 
   .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
@@ -611,15 +643,208 @@
   }
   .ing-pill-toggle:hover { border-color: var(--gold-dim); color: var(--text); }
   .ing-pill-toggle.active-shake { border-color: var(--gold-dim); color: var(--gold); background: rgba(201,168,76,0.08); }
+  .ing-pill-toggle.active-stir { border-color: rgba(100,170,210,0.6); color: rgba(100,170,210,0.9); background: rgba(100,170,210,0.08); }
   .ing-pill-toggle.active-optional { border-color: var(--text-muted); color: var(--text); background: rgba(138,128,112,0.1); }
 
-  /* FORM SECTION LABEL */
-  .form-section-label {
-    font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
-    color: var(--text-muted); margin: 18px 0 8px;
-    display: flex; align-items: center; gap: 8px;
+  /* Options button + submenu */
+  .ing-options-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    width: 32px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
   }
-  .form-section-label::after { content: ''; flex:1; height:1px; background: var(--border); }
+  .ing-options-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .ing-options-btn:focus { outline: none; }
+  .ing-options-btn.has-options { border-color: var(--gold-dim); color: var(--gold); }
+
+  .ing-options-row {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    margin-top: -2px;
+  }
+  .ing-options-row.open { display: flex; }
+
+  .ing-options-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .ing-options-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .substitutes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .substitute-row { display: flex; gap: 6px; align-items: center; }
+  .substitute-row .autocomplete-wrapper { flex: 1; min-width: 0; }
+  .substitute-row input.sub-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    padding: 6px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+    height: 30px;
+  }
+  .substitute-row input.sub-input:focus { border-color: var(--gold-dim); }
+  .substitute-row input.sub-input::placeholder { color: var(--text-muted); }
+  .sub-remove-btn {
+    background: none;
+    border: 1px solid var(--red);
+    color: var(--red);
+    width: 26px; height: 30px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .sub-remove-btn:hover { background: rgba(192,74,58,0.12); }
+  .sub-notes-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--border);
+    color: var(--text-muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.88rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    padding: 0 2px;
+    outline: none;
+    transition: border-color 0.2s;
+    height: 30px;
+  }
+  .sub-notes-input:focus { border-bottom-color: var(--gold-dim); color: var(--text); }
+  .sub-notes-input::placeholder { color: var(--text-muted); opacity: 0.5; font-style: italic; }
+  .add-sub-btn {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 2px;
+    align-self: flex-start;
+  }
+  .add-sub-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+  /* Display substitutes in recipe view */
+  .ing-substitute-list {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+    padding-left: 16px;
+    border-left: 2px solid var(--border);
+  }
+  .ing-substitute-list.open { display: flex; }
+  .sub-display-item {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+  }
+  .sub-display-item.have-sub { color: var(--green); }
+  .sub-display-item::before { content: '↳'; font-size: 0.75rem; opacity: 0.5; }
+  .sub-display-notes {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    opacity: 0.7;
+    margin-left: 4px;
+  }
+  .ing-row.has-subs .ing-name-wrap { cursor: pointer; }
+  .sub-toggle-arrow {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    margin-left: 4px;
+  }
+  .sub-toggle-arrow.open { transform: rotate(180deg); }
+  .flag-pill.flag-stir { background: rgba(100,170,210,0.12); color: rgba(100,170,210,0.9); border: 1px solid rgba(100,170,210,0.3); }
+
+  .ing-row-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: grab;
+    font-size: 0.85rem;
+    width: 18px;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+    touch-action: none;
+    user-select: none;
+  }
+  .drag-handle:active { cursor: grabbing; }
+  .form-ing-wrapper:hover .drag-handle { opacity: 0.8; }
+  .form-ing-wrapper.dragging {
+    opacity: 0.4;
+  }
+  .drag-over-above { border-top: 2px solid var(--gold); }
+  .drag-over-below { border-bottom: 2px solid var(--gold); }
+  .drop-zone-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 6px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    margin-top: 4px;
+    display: none;
+  }
+  .form-ing-list.drag-active .drop-zone-label { display: block; }
+  .form-subsection {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.1em;
+    margin: 24px 0 12px;
+  }
   .glass-icon { display: inline-flex; align-items: center; }
   .glass-icon svg { width: 20px; height: 20px; fill: var(--gold-dim); flex-shrink: 0; }
 
@@ -797,6 +1022,7 @@
   }
   .filter-chip:hover { border-color: var(--gold-dim); color: var(--text); }
   .filter-chip.active { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,0.1); }
+  .filter-chip.disabled { opacity: 0.35; }
 
   /* Ingredient search inside panel */
   .fing-search-wrap { position: relative; margin-top: 4px; }
@@ -878,6 +1104,8 @@
 
   /* Form ingredient rows on small screens */
   @media (max-width: 600px) {
+    .btn-gear-label { display: none; }
+    .btn-gear-only { display: inline !important; }
     header {
       padding: 32px 16px 24px;
     }
@@ -987,25 +1215,22 @@
       padding: 20px 16px;
     }
 
-    /* Form ingredient rows: wrap on mobile */
+    /* Form ingredient rows: tout sur une ligne sur mobile */
     .form-ing-row {
-      flex-wrap: wrap;
-      gap: 6px;
+      flex-wrap: nowrap;
+      gap: 5px;
     }
     .form-ing-row .autocomplete-wrapper {
-      flex: 1 1 calc(60% - 6px);
-      min-width: 120px;
+      flex: 2 1 0;
+      min-width: 0;
     }
     .form-ing-row .qty-input {
-      flex: 1 1 calc(40% - 6px);
-      min-width: 80px;
+      flex: 1 1 0;
+      min-width: 0;
     }
     .form-ing-row .ing-pill-toggle {
       flex: 1 1 calc(50% - 3px);
       font-size: 0.68rem;
-    }
-    .form-ing-row .remove-ing {
-      flex: 0 0 36px;
     }
 
     /* Form actions: full width buttons */
@@ -1070,6 +1295,22 @@
   }
   .tag-section { padding: 12px 16px 10px; }
   .tag-section + .tag-section { border-top: 1px solid var(--border); }
+  /* MÉTHODE CHIPS */
+  .method-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .method-chip {
+    background: none; border: 1px solid var(--border); border-radius: 3px;
+    color: var(--text-muted); font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 7px 16px; cursor: pointer; transition: all 0.15s;
+  }
+  .method-chip:hover { border-color: var(--gold-dim); color: var(--text); }
+  .method-chip.active { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,0.1); }
+
+  /* INGREDIENT COLOR STATUS */
+  .ing-row.ing-available .ing-name { color: var(--green); }
+  .ing-row.ing-missing .ing-name { color: var(--text-muted); }
+  .ing-row.ing-sub-available .ing-name { color: #b8a030; }
+
   .tag-section-label {
     font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--text-muted); margin-bottom: 8px;
@@ -1085,7 +1326,7 @@
   }
   .tag-chip:hover { border-color: var(--gold-dim); color: var(--text); }
   .tag-chip.active { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,0.1); }
-  .tag-chip.disabled { opacity: 0.35; cursor: not-allowed; }
+  .tag-chip.disabled { opacity: 0.35; }
 
   /* Tag pills displayed on recipe cards */
   .recipe-tags {
@@ -1128,7 +1369,7 @@
 <header>
   <h1>Le Bar</h1>
   <p>Votre carnet de recettes de cocktails</p>
-  <button onclick="reconfigure()" style="position:absolute;top:16px;right:16px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Josefin Sans',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;padding:10px 16px;border-radius:4px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold-dim)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">⚙ GitHub</button>
+  <button onclick="reconfigure()" style="position:absolute;top:16px;right:16px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Josefin Sans',sans-serif;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;padding:10px 16px;border-radius:4px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold-dim)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'"><span class="btn-gear-label">⚙ GitHub</span><span class="btn-gear-only" style="display:none">⚙</span></button>
 </header>
 
 <div class="tabs">
@@ -1224,17 +1465,21 @@
         </div>
         <div class="filter-panel-divider"></div>
 
-        <!-- Shake -->
-        <div class="frow" onclick="toggleFSection('fsec-shake')">
-          <span class="frow-label">Shake</span>
-          <span class="frow-val unset" id="fval-shake">Peu importe</span>
-          <span class="frow-arrow" id="farr-shake">›</span>
+        <!-- Méthode -->
+        <div class="frow" onclick="toggleFSection('fsec-method')">
+          <span class="frow-label">Méthode</span>
+          <span class="frow-val unset" id="fval-method">Tous</span>
+          <span class="frow-arrow" id="farr-method">›</span>
         </div>
-        <div class="fsection" id="fsec-shake" style="display:none">
-          <div class="filter-chips">
-            <button class="filter-chip active" data-val="" onclick="selectShake(this)">Peu importe</button>
-            <button class="filter-chip" data-val="yes" onclick="selectShake(this)">Shake requis</button>
-            <button class="filter-chip" data-val="no" onclick="selectShake(this)">Sans shake</button>
+        <div class="fsection" id="fsec-method" style="display:none">
+          <div class="filter-chips" id="method-filter-chips">
+            <button class="filter-chip active" data-val="" data-type="all" onclick="selectMethodFilter(this)">Tous</button>
+            <button class="filter-chip" data-val="shake" data-type="required" onclick="selectMethodFilter(this)">Shake requis</button>
+            <button class="filter-chip" data-val="stir" data-type="required" onclick="selectMethodFilter(this)">Stir requis</button>
+            <button class="filter-chip" data-val="blend" data-type="required" onclick="selectMethodFilter(this)">Blend requis</button>
+            <button class="filter-chip" data-val="shake" data-type="exclude" onclick="selectMethodFilter(this)">Sans shake</button>
+            <button class="filter-chip" data-val="stir" data-type="exclude" onclick="selectMethodFilter(this)">Sans stir</button>
+            <button class="filter-chip" data-val="blend" data-type="exclude" onclick="selectMethodFilter(this)">Sans blend</button>
           </div>
         </div>
         <div class="filter-panel-divider"></div>
@@ -1267,6 +1512,7 @@
             <button class="filter-chip" data-tag="Léger" onclick="toggleFilterTag(this)">Léger</button>
             <button class="filter-chip" data-tag="Sirupeux" onclick="toggleFilterTag(this)">Sirupeux</button>
             <button class="filter-chip" data-tag="Pétillant" onclick="toggleFilterTag(this)">Pétillant</button>
+            <button class="filter-chip" data-tag="Granité" onclick="toggleFilterTag(this)">Granité</button>
           </div>
           <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin:10px 0 5px;">Sucre</div>
           <div class="filter-chips" id="ftags-sucre">
@@ -1309,6 +1555,8 @@
   <div class="manage-form">
     <div class="form-title" id="form-title">Nouvelle recette</div>
     <input type="hidden" id="edit-id">
+
+    <div class="form-subsection">Informations</div>
     <div class="form-group">
       <label>Nom du cocktail</label>
       <input type="text" id="recipe-name" placeholder="Ex: Old Fashioned">
@@ -1341,6 +1589,33 @@
         </div>
         <input type="hidden" id="recipe-rating" value="0">
       </div>
+    </div>
+
+    <div class="form-subsection">Recette</div>
+    <div class="form-group">
+      <label>Ingrédients</label>
+      <div id="form-ing-list" class="form-ing-list">
+        <div class="drop-zone-label">Déposer ici</div>
+      </div>
+      <button class="btn" onclick="addFormIng()" style="margin-top:8px;">+ Ingrédient</button>
+    </div>
+    <div class="form-group">
+      <label>Toppings</label>
+      <div id="form-topping-list" class="form-ing-list">
+        <div class="drop-zone-label">Déposer ici</div>
+      </div>
+      <button class="btn" onclick="addFormTopping()" style="margin-top:8px;">+ Topping</button>
+    </div>
+
+    <div class="form-subsection">Détails</div>
+    <div class="form-group">
+      <label>Méthode</label>
+      <div class="method-chips" id="recipe-method-chips">
+        <button type="button" class="method-chip" data-val="shake" onclick="selectMethod(this)">Shake</button>
+        <button type="button" class="method-chip" data-val="stir" onclick="selectMethod(this)">Stir</button>
+        <button type="button" class="method-chip" data-val="blend" onclick="selectMethod(this)">Blend</button>
+      </div>
+      <input type="hidden" id="recipe-method" value="">
     </div>
     <div class="form-group">
       <label>Notes personnelles</label>
@@ -1381,6 +1656,7 @@
               <button type="button" class="tag-chip" data-section="texture" data-val="Léger" onclick="toggleTag(this)">Léger</button>
               <button type="button" class="tag-chip" data-section="texture" data-val="Sirupeux" onclick="toggleTag(this)">Sirupeux</button>
               <button type="button" class="tag-chip" data-section="texture" data-val="Pétillant" onclick="toggleTag(this)">Pétillant</button>
+              <button type="button" class="tag-chip" data-section="texture" data-val="Granité" onclick="toggleTag(this)">Granité</button>
             </div>
           </div>
           <!-- Sucre -->
@@ -1405,16 +1681,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label>Ingrédients</label>
-      <div id="form-ing-list" class="form-ing-list"></div>
-      <button class="btn" onclick="addFormIng()" style="margin-top:8px;">+ Ingrédient</button>
-    </div>
-    <div class="form-group">
-      <div class="form-section-label">Toppings</div>
-      <div id="form-topping-list" class="form-ing-list"></div>
-      <button class="btn" onclick="addFormTopping()" style="margin-top:8px;">+ Topping</button>
     </div>
     <div class="form-actions">
       <button class="btn" onclick="cancelEdit()">Annuler</button>
@@ -1796,6 +2062,27 @@ function setRating(val) {
   });
 }
 
+function selectMethod(btn) {
+  const current = document.getElementById('recipe-method').value;
+  const val = btn.dataset.val;
+  if (current === val) {
+    // Désélectionner
+    document.getElementById('recipe-method').value = '';
+    document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => c.classList.remove('active'));
+  } else {
+    document.getElementById('recipe-method').value = val;
+    document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+function selectMethodVal(val) {
+  document.getElementById('recipe-method').value = val || '';
+  document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.val === val);
+  });
+}
+
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 function showTab(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1805,7 +2092,7 @@ function showTab(name) {
   document.querySelectorAll('.tab-btn')[idx].classList.add('active');
   if (name === 'ingredients') renderIngredients();
   if (name === 'recipes') renderRecipes();
-  if (name === 'manage') { renderManageList(); if (!document.getElementById('edit-id').value) renderFormIngs([]); }
+  if (name === 'manage') { renderManageList(); if (!document.getElementById('edit-id').value) renderFormIngs([], []); }
 }
 
 // ─── INGREDIENTS ──────────────────────────────────────────────────────────────
@@ -1824,13 +2111,13 @@ async function renderIngredients() {
     <div class="ingredient-item ${mySet.has(i.id) ? 'checked' : ''}" onclick="toggleIng(${i.id}, this)" id="ing-item-${i.id}">
       <div class="check"></div>
       <span class="name">${i.name}</span>
-      <button class="edit-ing" onclick="event.stopPropagation();startEditIng(${i.id})" title="Renommer">✎</button>
-      <button class="del-ing" onclick="event.stopPropagation();deleteIng(${i.id})" title="Supprimer">×</button>
+      <button class="ing-menu-btn" onclick="event.stopPropagation();openIngMenu(event, ${i.id})" title="Options">⋯</button>
     </div>
   `).join('');
 }
 
 async function toggleIng(id, el) {
+  if (_openIngMenu) { closeIngMenu(); return; }
   const has = await txGet('myIngredients', id);
   if (has) { await txDelete('myIngredients', id); el.classList.remove('checked'); }
   else { await txPut('myIngredients', { id }); el.classList.add('checked'); }
@@ -1859,36 +2146,76 @@ async function deleteIng(id) {
   toast('Ingrédient supprimé');
 }
 
-function startEditIng(id) {
+// ─── ING MENU ─────────────────────────────────────────────────────────────────
+let _openIngMenu = null;
+
+function openIngMenu(event, id) {
+  closeIngMenu();
+  const btn = event.currentTarget;
   const item = document.getElementById('ing-item-' + id);
-  if (!item) return;
   const nameEl = item.querySelector('.name');
   const currentName = nameEl.textContent;
-  // Remplacer le span par un input inline
-  item.querySelector('.edit-ing').style.display = 'none';
-  item.querySelector('.del-ing').style.display = 'none';
-  item.style.pointerEvents = 'none'; // bloquer le toggle pendant l'édition
-  const input = document.createElement('input');
-  input.className = 'ing-edit-input';
-  input.value = currentName;
-  nameEl.replaceWith(input);
+
+  const popup = document.createElement('div');
+  popup.className = 'ing-menu-popup';
+  popup.innerHTML = `
+    <div class="ing-rename-wrap">
+      <input class="ing-rename-input" value="${currentName.replace(/"/g,'&quot;')}" autocomplete="off">
+    </div>
+    <div class="ing-menu-actions">
+      <button onclick="event.stopPropagation();ingMenuShowRename(${id})">Renommer</button>
+      <button class="danger" onclick="event.stopPropagation();ingMenuDelete(${id})">Supprimer</button>
+    </div>
+  `;
+  item.appendChild(popup);
+  btn.classList.add('open');
+  _openIngMenu = { id, popup, btn };
+}
+
+function ingMenuShowRename(id) {
+  if (!_openIngMenu) return;
+  const popup = _openIngMenu.popup;
+  const wrap = popup.querySelector('.ing-rename-wrap');
+  const actions = popup.querySelector('.ing-menu-actions');
+  wrap.classList.add('open');
+  actions.innerHTML = `<button onclick="event.stopPropagation();ingMenuRename(${id})">Valider</button>`;
+  const input = wrap.querySelector('.ing-rename-input');
   input.focus();
   input.select();
-  const confirm_ = async () => {
-    const newName = input.value.trim();
-    if (newName && newName !== currentName) {
-      await renameIng(id, newName);
-    } else {
-      renderIngredients();
-    }
-  };
   input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') confirm_();
-    if (e.key === 'Escape') renderIngredients();
+    if (e.key === 'Enter') ingMenuRename(id);
+    if (e.key === 'Escape') closeIngMenu();
     e.stopPropagation();
   });
-  input.addEventListener('blur', confirm_);
 }
+
+function closeIngMenu() {
+  if (_openIngMenu) {
+    _openIngMenu.popup.remove();
+    _openIngMenu.btn.classList.remove('open');
+    _openIngMenu = null;
+  }
+}
+
+async function ingMenuRename(id) {
+  if (!_openIngMenu) return;
+  const input = _openIngMenu.popup.querySelector('.ing-rename-input');
+  const newName = input.value.trim();
+  closeIngMenu();
+  if (!newName) return;
+  await renameIng(id, newName);
+}
+
+async function ingMenuDelete(id) {
+  closeIngMenu();
+  await deleteIng(id);
+}
+
+document.addEventListener('click', e => {
+  if (_openIngMenu && !e.target.closest('.ing-menu-popup') && !e.target.closest('.ing-menu-btn')) {
+    closeIngMenu();
+  }
+});
 
 async function renameIng(id, newName) {
   // Vérifier unicité
@@ -2014,15 +2341,40 @@ function loadTagsIntoForm(tags) {
 }
 
 // ─── TAG FILTER ───────────────────────────────────────────────────────────────
+const FILTER_TAG_LIMITS = { profil: 3, texture: 1, sucre: 1, complexite: 1 };
+// Track active filter tags per section
+let _activeFilterTagsBySection = { profil: [], texture: [], sucre: [], complexite: [] };
+
 function toggleFilterTag(btn) {
   const tag = btn.dataset.tag;
+  // Determine section from the parent container id
+  const container = btn.closest('[id^="ftags-"]');
+  const section = container ? container.id.replace('ftags-', '') : null;
+  const limit = section ? (FILTER_TAG_LIMITS[section] || 1) : 1;
+
   if (_activeFilterTags.has(tag)) {
     _activeFilterTags.delete(tag);
+    if (section && _activeFilterTagsBySection[section]) {
+      _activeFilterTagsBySection[section] = _activeFilterTagsBySection[section].filter(t => t !== tag);
+    }
     btn.classList.remove('active');
   } else {
+    // Check section limit
+    if (section && _activeFilterTagsBySection[section] && _activeFilterTagsBySection[section].length >= limit) {
+      // Remove the oldest one in this section
+      const oldest = _activeFilterTagsBySection[section].shift();
+      _activeFilterTags.delete(oldest);
+      const oldBtn = container.querySelector(`.filter-chip[data-tag="${CSS.escape(oldest)}"]`);
+      if (oldBtn) oldBtn.classList.remove('active');
+    }
     _activeFilterTags.add(tag);
+    if (section && _activeFilterTagsBySection[section] !== undefined) {
+      _activeFilterTagsBySection[section].push(tag);
+    }
     btn.classList.add('active');
   }
+  // Update disabled states for all filter tag sections
+  updateFilterTagChipStates();
   const count = _activeFilterTags.size;
   const fval = document.getElementById('fval-tags');
   if (count === 0) { fval.textContent = 'Tous'; fval.classList.add('unset'); }
@@ -2031,9 +2383,23 @@ function toggleFilterTag(btn) {
   renderRecipes();
 }
 
+function updateFilterTagChipStates() {
+  Object.keys(FILTER_TAG_LIMITS).forEach(section => {
+    const limit = FILTER_TAG_LIMITS[section];
+    const arr = _activeFilterTagsBySection[section] || [];
+    const container = document.getElementById('ftags-' + section);
+    if (!container) return;
+    container.querySelectorAll('.filter-chip').forEach(chip => {
+      const isActive = _activeFilterTags.has(chip.dataset.tag);
+      chip.classList.toggle('disabled', !isActive && arr.length >= limit);
+    });
+  });
+}
+
 function resetTagFilters() {
   _activeFilterTags.clear();
-  document.querySelectorAll('[id^="ftags-"] .filter-chip').forEach(c => c.classList.remove('active'));
+  _activeFilterTagsBySection = { profil: [], texture: [], sucre: [], complexite: [] };
+  document.querySelectorAll('[id^="ftags-"] .filter-chip').forEach(c => c.classList.remove('active', 'disabled'));
   const fval = document.getElementById('fval-tags');
   fval.textContent = 'Tous'; fval.classList.add('unset');
 }
@@ -2159,17 +2525,59 @@ function selectFilterRating(val) {
   renderRecipes();
 }
 
-// ── Shake ─────────────────────────────────────────────────────────────────────
-let filterShake = ''; // '' | 'yes' | 'no'
+// ── Méthode ───────────────────────────────────────────────────────────────────
+// filterMethod: { required: 'shake'|'stir'|'blend'|null, excludes: Set(['shake','stir','blend']) }
+let filterMethod = { required: null, excludes: new Set() };
 
-function selectShake(btn) {
-  document.querySelectorAll('#fsec-shake .filter-chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  filterShake = btn.dataset.val;
-  const valEl = document.getElementById('fval-shake');
-  const labels = { '': 'Peu importe', 'yes': 'Requis', 'no': 'Non requis' };
-  valEl.textContent = labels[filterShake];
-  valEl.classList.toggle('unset', !filterShake);
+function selectMethodFilter(btn) {
+  const val = btn.dataset.val;   // '' | 'shake' | 'stir' | 'blend'
+  const type = btn.dataset.type; // 'all' | 'required' | 'exclude'
+
+  if (type === 'all') {
+    // Tout réinitialiser
+    filterMethod = { required: null, excludes: new Set() };
+  } else if (type === 'required') {
+    const isActive = btn.classList.contains('active');
+    filterMethod = { required: isActive ? null : val, excludes: new Set() };
+  } else if (type === 'exclude') {
+    // Si un "requis" ou "tous" est actif, on switch vers "exclude"
+    if (filterMethod.required !== null) {
+      filterMethod = { required: null, excludes: new Set() };
+    }
+    if (filterMethod.excludes.has(val)) {
+      filterMethod.excludes.delete(val);
+    } else {
+      filterMethod.excludes.add(val);
+    }
+  }
+
+  // Mettre à jour visuellement tous les chips
+  document.querySelectorAll('#method-filter-chips .filter-chip').forEach(c => {
+    const cVal = c.dataset.val;
+    const cType = c.dataset.type;
+    if (cType === 'all') {
+      c.classList.toggle('active', !filterMethod.required && filterMethod.excludes.size === 0);
+    } else if (cType === 'required') {
+      c.classList.toggle('active', filterMethod.required === cVal);
+      c.classList.toggle('disabled', filterMethod.excludes.size > 0 || (filterMethod.required !== null && filterMethod.required !== cVal));
+    } else if (cType === 'exclude') {
+      c.classList.toggle('active', filterMethod.excludes.has(cVal));
+      c.classList.toggle('disabled', filterMethod.required !== null);
+    }
+  });
+
+  // Mettre à jour le label
+  const valEl = document.getElementById('fval-method');
+  if (!filterMethod.required && filterMethod.excludes.size === 0) {
+    valEl.textContent = 'Tous'; valEl.classList.add('unset');
+  } else if (filterMethod.required) {
+    const labels = { shake: 'Shake requis', stir: 'Stir requis', blend: 'Blend requis' };
+    valEl.textContent = labels[filterMethod.required]; valEl.classList.remove('unset');
+  } else {
+    const labels = [...filterMethod.excludes].map(v => 'Sans ' + v).join(', ');
+    valEl.textContent = labels; valEl.classList.remove('unset');
+  }
+
   updateFilterBadge();
   renderRecipes();
 }
@@ -2213,11 +2621,12 @@ function resetFilters() {
   document.getElementById('fval-rating').textContent = 'Toutes';
   document.getElementById('fval-rating').classList.add('unset');
 
-  filterShake = '';
-  document.querySelectorAll('#fsec-shake .filter-chip').forEach(c => c.classList.remove('active'));
-  document.querySelector('#fsec-shake .filter-chip[data-val=""]').classList.add('active');
-  document.getElementById('fval-shake').textContent = 'Peu importe';
-  document.getElementById('fval-shake').classList.add('unset');
+  filterMethod = { required: null, excludes: new Set() };
+  document.querySelectorAll('#method-filter-chips .filter-chip').forEach(c => c.classList.remove('active', 'disabled'));
+  const allChip = document.querySelector('#method-filter-chips .filter-chip[data-type="all"]');
+  if (allChip) allChip.classList.add('active');
+  document.getElementById('fval-method').textContent = 'Tous';
+  document.getElementById('fval-method').classList.add('unset');
 
   resetTagFilters();
 
@@ -2227,7 +2636,7 @@ function resetFilters() {
 
 // ── Badge ──────────────────────────────────────────────────────────────────────
 function updateFilterBadge() {
-  const count = (_activeGlass ? 1 : 0) + (_activeIngId ? 1 : 0) + (_minRating ? 1 : 0) + (filterActive ? 1 : 0) + (filterShake ? 1 : 0) + (_activeFilterTags.size > 0 ? 1 : 0) + (filterFavorites ? 1 : 0);
+  const count = (_activeGlass ? 1 : 0) + (_activeIngId ? 1 : 0) + (_minRating ? 1 : 0) + (filterActive ? 1 : 0) + (filterMethod.required || filterMethod.excludes.size > 0 ? 1 : 0) + (_activeFilterTags.size > 0 ? 1 : 0) + (filterFavorites ? 1 : 0);
   const badge = document.getElementById('filter-count-badge');
   const btn   = document.getElementById('filter-main-btn');
   if (count > 0) {
@@ -2267,17 +2676,23 @@ function resolveIngName(ing) {
   return ing.name || '?';
 }
 
+function ingAvailable(ing) {
+  if (ing.optional) return true;
+  const id = resolveIngId(ing);
+  if (id && _mySet.has(id)) return true;
+  // Check substitutes
+  if (ing.substitutes && ing.substitutes.length) {
+    return ing.substitutes.some(sub => {
+      const sid = resolveIngId(sub);
+      return sid && _mySet.has(sid);
+    });
+  }
+  return false;
+}
+
 function isMakeable(r) {
-  const ingOk = r.ingredients.every(ing => {
-    if (ing.optional) return true;
-    const id = resolveIngId(ing);
-    return id && _mySet.has(id);
-  });
-  const toppingOk = (r.toppings || []).every(t => {
-    if (t.optional) return true;
-    const id = resolveIngId(t);
-    return id && _mySet.has(id);
-  });
+  const ingOk = r.ingredients.every(ing => ingAvailable(ing));
+  const toppingOk = (r.toppings || []).every(t => ingAvailable(t));
   return ingOk && toppingOk;
 }
 
@@ -2292,8 +2707,12 @@ async function renderRecipes() {
   if (_activeIngId)  filtered = filtered.filter(r =>
     [...(r.ingredients || []), ...(r.toppings || [])].some(i => resolveIngId(i) === _activeIngId)
   );
-  if (filterShake === 'yes')  filtered = filtered.filter(r => r.ingredients.some(i => i.shake));
-  if (filterShake === 'no')   filtered = filtered.filter(r => !r.ingredients.some(i => i.shake));
+  if (filterMethod.required) {
+    filtered = filtered.filter(r => r.method === filterMethod.required);
+  }
+  if (filterMethod.excludes.size > 0) {
+    filtered = filtered.filter(r => !filterMethod.excludes.has(r.method || ''));
+  }
   if (_activeFilterTags.size > 0) {
     filtered = filtered.filter(r => {
       const allTags = recipeAllTags(r);
@@ -2311,7 +2730,7 @@ async function renderRecipes() {
 
   const list = document.getElementById('recipes-list');
   if (!filtered.length) {
-    const hasFilter = filterActive || filterFavorites || _activeGlass || _activeIngId || _minRating || filterShake || _activeFilterTags.size > 0;
+    const hasFilter = filterActive || filterFavorites || _activeGlass || _activeIngId || _minRating || filterMethod.required || filterMethod.excludes.size > 0 || _activeFilterTags.size > 0;
     list.innerHTML = '<div class="empty"><div class="icon">🍹</div><p>' + (hasFilter ? 'Aucune recette correspond aux filtres' : 'Aucune recette') + '</p></div>';
     return;
   }
@@ -2319,6 +2738,10 @@ async function renderRecipes() {
   list.innerHTML = filtered.map(r => {
     const makeable = isMakeable(r);
     const metaItems = [];
+    if (r.method) {
+      const mLabels = { shake: 'Shake', stir: 'Stir', blend: 'Blend' };
+      metaItems.push(`<span style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);padding:3px 8px;border:1px solid var(--border);border-radius:2px;">${mLabels[r.method]||r.method}</span>`);
+    }
     if (r.glass) metaItems.push(`<span style="display:flex;align-items:center;gap:5px;color:var(--text-muted);font-size:0.7rem;letter-spacing:0.1em;">${glassIcon(r.glass)}<span>${GLASS_LABELS[r.glass]||r.glass}</span></span>`);
     if (r.rating) metaItems.push(starsDisplay(r.rating));
 
@@ -2326,24 +2749,56 @@ async function renderRecipes() {
       const id = resolveIngId(ing);
       const have = id && _mySet.has(id);
       const displayName = resolveIngName(ing);
+      // Check if available via substitute
+      const availableViaSub = !have && !ing.optional && ing.substitutes && ing.substitutes.some(sub => {
+        const sid = resolveIngId(sub); return sid && _mySet.has(sid);
+      });
+      const isMissing = !have && !ing.optional && !availableViaSub;
       const flags = [
         ing.shake ? `<span class="flag-pill flag-shake">Shake</span>` : '',
+        ing.stir ? `<span class="flag-pill flag-stir">Stir</span>` : '',
         ing.optional ? `<span class="flag-pill flag-optional">Facultatif</span>` : ''
       ].filter(Boolean).join('');
-      return `<div class="ing-row ${!have ? 'missing-ing' : ''}">
-        <span class="ing-name">${displayName}${flags ? `<span class="ing-flags">${flags}</span>` : ''}</span>
+      const hasSubs = ing.substitutes && ing.substitutes.length > 0;
+      const subsHtml = hasSubs ? ing.substitutes.map(sub => {
+        const sid = resolveIngId(sub);
+        const shave = sid && _mySet.has(sid);
+        const sname = resolveIngName(sub);
+        const snotes = sub.notes ? `<span class="sub-display-notes">${sub.notes}</span>` : '';
+        return `<div class="sub-display-item ${shave ? 'have-sub' : ''}">${sname}${snotes}</div>`;
+      }).join('') : '';
+      const nameHtml = hasSubs
+        ? `<span class="ing-name-wrap" style="display:flex;align-items:center;gap:4px;">${displayName}<span class="sub-toggle-arrow">▼</span></span>`
+        : `<span class="ing-name-wrap">${displayName}</span>`;
+      const statusClass = have ? 'ing-available' : (availableViaSub ? 'ing-sub-available' : 'ing-missing');
+      return `<div class="ing-row ${statusClass} ${hasSubs ? 'has-subs' : ''}" ${hasSubs ? `onclick="toggleSubList(this)"` : ''} style="${hasSubs ? 'cursor:pointer;' : ''}">
+        <span class="ing-name">${nameHtml}${flags ? `<span class="ing-flags">${flags}</span>` : ''}${hasSubs ? `<div class="ing-substitute-list">${subsHtml}</div>` : ''}</span>
         <span class="ing-qty">${ing.qty}</span>
       </div>`;
     }).join('');
 
     const toppingRows = (r.toppings && r.toppings.length) ? `
       <div class="topping-divider">Toppings</div>
-      ${r.toppings.map(t => { const tid = resolveIngId(t); const thave = tid && _mySet.has(tid); const dn = resolveIngName(t); const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : ''; return `<div class="ing-row ${!thave ? 'missing-ing' : ''}"><span class="ing-name">${dn}${f}</span><span class="ing-qty">${t.qty}</span></div>`; }).join('')}` : '';
+      ${r.toppings.map(t => {
+        const tid = resolveIngId(t); const thave = tid && _mySet.has(tid);
+        const availViaSub = !thave && !t.optional && t.substitutes && t.substitutes.some(sub => { const sid = resolveIngId(sub); return sid && _mySet.has(sid); });
+        const isMissing = !thave && !t.optional && !availViaSub;
+        const dn = resolveIngName(t);
+        const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : '';
+        const hasSubs = t.substitutes && t.substitutes.length > 0;
+        const subsHtml = hasSubs ? t.substitutes.map(sub => { const sid = resolveIngId(sub); const shave = sid && _mySet.has(sid); const snotes = sub.notes ? `<span class="sub-display-notes">${sub.notes}</span>` : ''; return `<div class="sub-display-item ${shave ? 'have-sub' : ''}">${resolveIngName(sub)}${snotes}</div>`; }).join('') : '';
+        const nameHtml = hasSubs ? `<span class="ing-name-wrap" style="display:flex;align-items:center;gap:4px;">${dn}<span class="sub-toggle-arrow">▼</span></span>` : `<span class="ing-name-wrap">${dn}</span>`;
+        const tStatusClass = thave ? 'ing-available' : (availViaSub ? 'ing-sub-available' : 'ing-missing');
+        return `<div class="ing-row ${tStatusClass} ${hasSubs ? 'has-subs' : ''}" ${hasSubs ? `onclick="toggleSubList(this)"` : ''} style="${hasSubs ? 'cursor:pointer;' : ''}"><span class="ing-name">${nameHtml}${f}${hasSubs ? `<div class="ing-substitute-list">${subsHtml}</div>` : ''}</span><span class="ing-qty">${t.qty}</span></div>`;
+      }).join('')}` : '';
 
     const missingIngs = [...(r.ingredients || []), ...(r.toppings || [])].filter(ing => {
       if (ing.optional) return false;
       const id = resolveIngId(ing);
-      return !(id && _mySet.has(id));
+      if (id && _mySet.has(id)) return false;
+      // Check substitutes
+      if (ing.substitutes && ing.substitutes.some(sub => { const sid = resolveIngId(sub); return sid && _mySet.has(sid); })) return false;
+      return true;
     });
     const badgeLabel = makeable
       ? '✓ Réalisable'
@@ -2379,6 +2834,14 @@ function toggleCard(id) {
   document.getElementById('rc-'+id).classList.toggle('open');
 }
 
+function toggleSubList(row) {
+  const subList = row.querySelector('.ing-substitute-list');
+  const arrow = row.querySelector('.sub-toggle-arrow');
+  if (!subList) return;
+  subList.classList.toggle('open');
+  if (arrow) arrow.classList.toggle('open');
+}
+
 // ─── MANAGE ───────────────────────────────────────────────────────────────────
 async function renderManageList() {
   await refreshInventory();
@@ -2391,6 +2854,7 @@ async function renderManageList() {
       const displayName = resolveIngName(ing);
       const flags = [
         ing.shake ? `<span class="flag-pill flag-shake">Shake</span>` : '',
+        ing.stir ? `<span class="flag-pill flag-stir">Stir</span>` : '',
         ing.optional ? `<span class="flag-pill flag-optional">Facultatif</span>` : ''
       ].filter(Boolean).join('');
       return `<div class="ing-row">
@@ -2438,6 +2902,7 @@ function startNew() {
   document.getElementById('recipe-notes').value = '';
   document.getElementById('form-title').textContent = 'Nouvelle recette';
   setRating(0);
+  selectMethodVal('');
   resetFormTags();
   renderFormIngs([], []);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2460,11 +2925,17 @@ function renderFormIngs(ings, toppings) {
 async function addFormIng(preset = null) {
   await refreshIngCache();
   const list = document.getElementById('form-ing-list');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'form-ing-wrapper';
+  wrapper.draggable = true;
   const row = document.createElement('div');
   row.className = 'form-ing-row';
   const shake = preset && preset.shake ? 'active-shake' : '';
+  const stir = preset && preset.stir ? 'active-stir' : '';
   const optional = preset && preset.optional ? 'active-optional' : '';
+  const hasOpts = (preset && (preset.optional || (preset.substitutes && preset.substitutes.length))) ? 'has-options' : '';
   row.innerHTML = `
+    <span class="drag-handle" title="Déplacer">⠿</span>
     <div class="autocomplete-wrapper">
       <input type="text" placeholder="Ingrédient" class="ing-input" autocomplete="off"
         oninput="showAC(this)" onfocus="showAC(this)">
@@ -2472,11 +2943,25 @@ async function addFormIng(preset = null) {
       <div class="autocomplete-dropdown" style="display:none"></div>
     </div>
     <input type="text" placeholder="Quantit\u00e9" class="qty-input">
-    <button type="button" class="ing-pill-toggle ${shake}" title="\u00c0 shaker" onclick="this.classList.toggle('active-shake')">Shake</button>
-    <button type="button" class="ing-pill-toggle ${optional}" title="Facultatif" onclick="this.classList.toggle('active-optional')">Facultatif</button>
-    <button class="remove-ing" onclick="this.closest('.form-ing-row').remove()">\u00d7</button>
+    <div class="ing-row-actions">
+      <button type="button" class="ing-options-btn ${hasOpts}" title="Options" onclick="toggleIngOptions(this)">⋯</button>
+      <button class="remove-ing" onclick="this.closest('.form-ing-wrapper').remove()">×</button>
+    </div>
   `;
-  list.appendChild(row);
+  // Options panel
+  const opts = document.createElement('div');
+  opts.className = 'ing-options-row';
+  opts.innerHTML = `
+    <div class="ing-options-pills">
+      <button type="button" class="ing-pill-toggle ${optional}" title="Facultatif" onclick="toggleIngPill(this,'active-optional',this.closest('.form-ing-wrapper'))">Facultatif</button>
+    </div>
+    <div class="ing-options-label">Substituts</div>
+    <div class="substitutes-list"></div>
+    <button type="button" class="add-sub-btn" onclick="addSubstituteRow(this.previousElementSibling)">+ Ajouter un substitut</button>
+  `;
+  wrapper.appendChild(row);
+  wrapper.appendChild(opts);
+  list.appendChild(wrapper);
   if (preset) {
     const ing = preset.id
       ? _cachedIngs.find(i => i.id === preset.id)
@@ -2488,39 +2973,19 @@ async function addFormIng(preset = null) {
       row.querySelector('.ing-input').value = preset.name;
     }
     row.querySelector('.qty-input').value = preset.qty || '';
+    if (preset.substitutes && preset.substitutes.length) {
+      const subList = opts.querySelector('.substitutes-list');
+      preset.substitutes.forEach(sub => addSubstituteRow(subList, sub));
+    }
   }
 }
 
-async function addFormTopping(preset = null) {
-  await refreshIngCache();
-  const list = document.getElementById('form-topping-list');
-  const row = document.createElement('div');
-  row.className = 'form-ing-row';
-  const optional = preset && preset.optional ? 'active-optional' : '';
-  row.innerHTML = `
-    <div class="autocomplete-wrapper">
-      <input type="text" placeholder="Topping" class="ing-input" autocomplete="off"
-        oninput="showAC(this)" onfocus="showAC(this)">
-      <input type="hidden" class="ing-id-input">
-      <div class="autocomplete-dropdown" style="display:none"></div>
-    </div>
-    <input type="text" placeholder="Quantit\u00e9" class="qty-input">
-    <button type="button" class="ing-pill-toggle ${optional}" title="Facultatif" onclick="this.classList.toggle('active-optional')">Facultatif</button>
-    <button class="remove-ing" onclick="this.closest('.form-ing-row').remove()">\u00d7</button>
-  `;
-  list.appendChild(row);
-  if (preset) {
-    const ing = preset.id
-      ? _cachedIngs.find(i => i.id === preset.id)
-      : _cachedIngs.find(i => i.name === preset.name);
-    if (ing) {
-      row.querySelector('.ing-input').value = ing.name;
-      row.querySelector('.ing-id-input').value = ing.id;
-    } else if (preset.name) {
-      row.querySelector('.ing-input').value = preset.name;
-    }
-    row.querySelector('.qty-input').value = preset.qty || '';
-  }
+function toggleIngOptions(btn) {
+  const wrapper = btn.closest('.form-ing-wrapper');
+  const opts = wrapper.querySelector('.ing-options-row');
+  const isOpen = opts.classList.contains('open');
+  opts.classList.toggle('open', !isOpen);
+  btn.blur();
 }
 
 function showAC(input) {
@@ -2557,53 +3022,201 @@ document.addEventListener('click', e => {
   }
 });
 
+function toggleIngPill(btn, cls, wrapper) {
+  btn.classList.toggle(cls);
+  updateIngOptionsBtn(wrapper);
+}
+
+function updateIngOptionsBtn(wrapper) {
+  const btn = wrapper.querySelector('.ing-options-btn');
+  const hasActive = wrapper.querySelector('.ing-pill-toggle.active-shake, .ing-pill-toggle.active-stir, .ing-pill-toggle.active-optional');
+  const hasSubs = wrapper.querySelectorAll('.substitute-row').length > 0;
+  btn.classList.toggle('has-options', !!(hasActive || hasSubs));
+}
+
+function addSubstituteRow(subList, preset = null) {
+  const row = document.createElement('div');
+  row.className = 'substitute-row';
+  row.innerHTML = `
+    <div class="autocomplete-wrapper">
+      <input type="text" placeholder="Substitut" class="sub-input" autocomplete="off"
+        oninput="showSubAC(this)" onfocus="showSubAC(this)">
+      <input type="hidden" class="sub-id-input">
+      <div class="autocomplete-dropdown" style="display:none"></div>
+    </div>
+    <input type="text" placeholder="Notes" class="sub-notes-input">
+    <button type="button" class="sub-remove-btn" onclick="this.closest('.substitute-row').remove();updateIngOptionsBtn(this.closest('.form-ing-wrapper'))">×</button>
+  `;
+  subList.appendChild(row);
+  if (preset) {
+    const ing = preset.id
+      ? _cachedIngs.find(i => i.id === preset.id)
+      : _cachedIngs.find(i => i.name === preset.name);
+    if (ing) {
+      row.querySelector('.sub-input').value = ing.name;
+      row.querySelector('.sub-id-input').value = ing.id;
+    } else if (preset.name) {
+      row.querySelector('.sub-input').value = preset.name;
+    }
+    if (preset.notes) row.querySelector('.sub-notes-input').value = preset.notes;
+  }
+  updateIngOptionsBtn(subList.closest('.form-ing-wrapper'));
+}
+
+function showSubAC(input) {
+  const val = input.value.toLowerCase().trim();
+  const dropdown = input.parentElement.querySelector('.autocomplete-dropdown');
+  const ings = _cachedIngs;
+  const matches = val
+    ? ings.filter(i => i.name.toLowerCase().includes(val)).slice(0, 10)
+    : ings.slice().sort((a,b) => a.name.localeCompare(b.name)).slice(0, 14);
+  if (!matches.length) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = matches.map(i => {
+    let label = i.name;
+    if (val) {
+      const idx = i.name.toLowerCase().indexOf(val);
+      if (idx >= 0) label = i.name.slice(0, idx) + `<strong style="color:var(--gold-light)">${i.name.slice(idx, idx + val.length)}</strong>` + i.name.slice(idx + val.length);
+    }
+    return `<div onmousedown="selectSubAC(this)">${label}</div>`;
+  }).join('');
+  dropdown.querySelectorAll('div').forEach((el, i) => {
+    el.dataset.name = matches[i].name;
+    el.dataset.id = matches[i].id;
+  });
+  dropdown.style.display = 'block';
+}
+
+function selectSubAC(el) {
+  const wrapper = el.closest('.autocomplete-wrapper');
+  wrapper.querySelector('.sub-input').value = el.dataset.name;
+  wrapper.querySelector('.sub-id-input').value = el.dataset.id;
+  el.closest('.autocomplete-dropdown').style.display = 'none';
+}
+
+async function addFormTopping(preset = null) {
+  await refreshIngCache();
+  const list = document.getElementById('form-topping-list');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'form-ing-wrapper';
+  wrapper.draggable = true;
+  const row = document.createElement('div');
+  row.className = 'form-ing-row';
+  const optional = preset && preset.optional ? 'active-optional' : '';
+  const hasOpts = (preset && (preset.optional || (preset.substitutes && preset.substitutes.length))) ? 'has-options' : '';
+  row.innerHTML = `
+    <span class="drag-handle" title="Déplacer">⠿</span>
+    <div class="autocomplete-wrapper">
+      <input type="text" placeholder="Topping" class="ing-input" autocomplete="off"
+        oninput="showAC(this)" onfocus="showAC(this)">
+      <input type="hidden" class="ing-id-input">
+      <div class="autocomplete-dropdown" style="display:none"></div>
+    </div>
+    <input type="text" placeholder="Quantit\u00e9" class="qty-input">
+    <div class="ing-row-actions">
+      <button type="button" class="ing-options-btn ${hasOpts}" title="Options" onclick="toggleIngOptions(this)">⋯</button>
+      <button class="remove-ing" onclick="this.closest('.form-ing-wrapper').remove()">\u00d7</button>
+    </div>
+  `;
+  const opts = document.createElement('div');
+  opts.className = 'ing-options-row';
+  opts.innerHTML = `
+    <div class="ing-options-pills">
+      <button type="button" class="ing-pill-toggle ${optional}" title="Facultatif" onclick="toggleIngPill(this,'active-optional',this.closest('.form-ing-wrapper'))">Facultatif</button>
+    </div>
+    <div class="ing-options-label">Substituts</div>
+    <div class="substitutes-list"></div>
+    <button type="button" class="add-sub-btn" onclick="addSubstituteRow(this.previousElementSibling)">+ Ajouter un substitut</button>
+  `;
+  wrapper.appendChild(row);
+  wrapper.appendChild(opts);
+  list.appendChild(wrapper);
+  if (preset) {
+    const ing = preset.id
+      ? _cachedIngs.find(i => i.id === preset.id)
+      : _cachedIngs.find(i => i.name === preset.name);
+    if (ing) {
+      row.querySelector('.ing-input').value = ing.name;
+      row.querySelector('.ing-id-input').value = ing.id;
+    } else if (preset.name) {
+      row.querySelector('.ing-input').value = preset.name;
+    }
+    row.querySelector('.qty-input').value = preset.qty || '';
+    if (preset.substitutes && preset.substitutes.length) {
+      const subList = opts.querySelector('.substitutes-list');
+      preset.substitutes.forEach(sub => addSubstituteRow(subList, sub));
+    }
+  }
+}
+
 async function saveRecipe() {
   const name = document.getElementById('recipe-name').value.trim();
   if (!name) { toast('Veuillez entrer un nom'); return; }
-  const rows = document.querySelectorAll('#form-ing-list .form-ing-row');
+  const rows = document.querySelectorAll('#form-ing-list .form-ing-wrapper');
   const ingredients = [];
-  rows.forEach(row => {
-    const n = row.querySelector('.ing-input').value.trim();
-    const idVal = row.querySelector('.ing-id-input').value.trim();
-    const q = row.querySelector('.qty-input').value.trim();
+  rows.forEach(wrapper => {
+    const n = wrapper.querySelector('.ing-input').value.trim();
+    const idVal = wrapper.querySelector('.ing-id-input').value.trim();
+    const q = wrapper.querySelector('.qty-input').value.trim();
     if (n) {
-      const shake = row.querySelector('.ing-pill-toggle.active-shake') ? true : false;
-      const optional = row.querySelector('.ing-pill-toggle.active-optional') ? true : false;
+      const optional = wrapper.querySelector('.ing-pill-toggle.active-optional') ? true : false;
       const ingId = idVal ? parseInt(idVal) : null;
+      // Collect substitutes
+      const substitutes = [];
+      wrapper.querySelectorAll('.substitute-row').forEach(sr => {
+        const sn = sr.querySelector('.sub-input').value.trim();
+        const sid = sr.querySelector('.sub-id-input').value.trim();
+        const snotes = sr.querySelector('.sub-notes-input') ? sr.querySelector('.sub-notes-input').value.trim() : '';
+        if (sn) {
+          const subObj = sid ? { id: parseInt(sid) } : { name: sn };
+          if (snotes) subObj.notes = snotes;
+          substitutes.push(subObj);
+        }
+      });
       if (ingId) {
-        ingredients.push({ id: ingId, qty: q || '', shake, optional });
+        ingredients.push({ id: ingId, qty: q || '', optional, substitutes });
       } else {
-        // ingrédient non trouvé dans le catalogue — on garde le nom en fallback
-        ingredients.push({ name: n, qty: q || '', shake, optional });
+        ingredients.push({ name: n, qty: q || '', optional, substitutes });
       }
     }
   });
-  const toppingRows = document.querySelectorAll('#form-topping-list .form-ing-row');
+  const toppingRows = document.querySelectorAll('#form-topping-list .form-ing-wrapper');
   const toppings = [];
-  toppingRows.forEach(row => {
-    const n = row.querySelector('.ing-input').value.trim();
-    const idVal = row.querySelector('.ing-id-input').value.trim();
-    const q = row.querySelector('.qty-input').value.trim();
+  toppingRows.forEach(wrapper => {
+    const n = wrapper.querySelector('.ing-input').value.trim();
+    const idVal = wrapper.querySelector('.ing-id-input').value.trim();
+    const q = wrapper.querySelector('.qty-input').value.trim();
     if (n) {
-      const optional = row.querySelector('.ing-pill-toggle.active-optional') ? true : false;
+      const optional = wrapper.querySelector('.ing-pill-toggle.active-optional') ? true : false;
       const ingId = idVal ? parseInt(idVal) : null;
+      const substitutes = [];
+      wrapper.querySelectorAll('.substitute-row').forEach(sr => {
+        const sn = sr.querySelector('.sub-input').value.trim();
+        const sid = sr.querySelector('.sub-id-input').value.trim();
+        const snotes = sr.querySelector('.sub-notes-input') ? sr.querySelector('.sub-notes-input').value.trim() : '';
+        if (sn) {
+          const subObj = sid ? { id: parseInt(sid) } : { name: sn };
+          if (snotes) subObj.notes = snotes;
+          substitutes.push(subObj);
+        }
+      });
       if (ingId) {
-        toppings.push({ id: ingId, qty: q || '', optional });
+        toppings.push({ id: ingId, qty: q || '', optional, substitutes });
       } else {
-        toppings.push({ name: n, qty: q || '', optional });
+        toppings.push({ name: n, qty: q || '', optional, substitutes });
       }
     }
   });
   const glass = document.getElementById('recipe-glass').value;
+  const method = document.getElementById('recipe-method').value;
   const rating = parseInt(document.getElementById('recipe-rating').value) || 0;
   const notes = document.getElementById('recipe-notes').value.trim();
   const tags = { profil: [..._formTags.profil], texture: [..._formTags.texture], sucre: [..._formTags.sucre], complexite: [..._formTags.complexite] };
   const editId = document.getElementById('edit-id').value;
   if (editId) {
-    await txPut('recipes', { id: parseInt(editId), name, ingredients, toppings, glass, rating, notes, tags });
+    await txPut('recipes', { id: parseInt(editId), name, ingredients, toppings, glass, method, rating, notes, tags });
     toast('Recette mise à jour');
   } else {
-    await txAdd('recipes', { name, ingredients, toppings, glass, rating, notes, tags });
+    await txAdd('recipes', { name, ingredients, toppings, glass, method, rating, notes, tags });
     toast('Recette enregistrée');
   }
   startNew();
@@ -2611,14 +3224,15 @@ async function saveRecipe() {
 }
 
 async function editRecipe(id) {
-  showTab('manage');
   const r = await txGet('recipes', id);
   document.getElementById('edit-id').value = id;
+  showTab('manage');
   document.getElementById('recipe-name').value = r.name;
   document.getElementById('recipe-glass').value = r.glass || '';
   document.getElementById('recipe-notes').value = r.notes || '';
   document.getElementById('form-title').textContent = 'Modifier — ' + r.name;
   setRating(r.rating || 0);
+  selectMethodVal(r.method || '');
   loadTagsIntoForm(r.tags || null);
   renderFormIngs(r.ingredients, r.toppings || []);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2702,19 +3316,193 @@ function reconfigure() {
 (function() {
   const tabs = document.querySelector('.tabs');
   const header = document.querySelector('header');
-  function onScroll() {
-    const headerBottom = header.getBoundingClientRect().bottom;
-    if (headerBottom <= 0) {
-      tabs.classList.add('scrolled');
-    } else {
-      tabs.classList.remove('scrolled');
+  const observer = new IntersectionObserver(
+    ([entry]) => tabs.classList.toggle('scrolled', !entry.isIntersecting),
+    { threshold: 0 }
+  );
+  observer.observe(header);
+})();
+
+// ─── DRAG & DROP INGRÉDIENTS ──────────────────────────────────────────────────
+let _dragSrc = null;
+
+function initDragDrop() {
+  const lists = [
+    document.getElementById('form-ing-list'),
+    document.getElementById('form-topping-list')
+  ];
+
+  lists.forEach(list => {
+    list.addEventListener('dragover', e => {
+      e.preventDefault();
+      const target = getDragTarget(e, list);
+      clearDragOver();
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        target.classList.add(e.clientY < mid ? 'drag-over-above' : 'drag-over-below');
+      }
+      lists.forEach(l => l.classList.add('drag-active'));
+    });
+
+    list.addEventListener('dragleave', e => {
+      if (!list.contains(e.relatedTarget)) {
+        clearDragOver();
+      }
+    });
+
+    list.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!_dragSrc) return;
+      const target = getDragTarget(e, list);
+      clearDragOver();
+      lists.forEach(l => l.classList.remove('drag-active'));
+
+      if (target && target !== _dragSrc) {
+        const rect = target.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) {
+          list.insertBefore(_dragSrc, target);
+        } else {
+          list.insertBefore(_dragSrc, target.nextSibling);
+        }
+      } else if (!target) {
+        // Dropped on empty list area — append
+        list.appendChild(_dragSrc);
+      }
+
+      _dragSrc.classList.remove('dragging');
+      _dragSrc = null;
+    });
+
+    list.addEventListener('dragend', () => {
+      if (_dragSrc) { _dragSrc.classList.remove('dragging'); _dragSrc = null; }
+      clearDragOver();
+      lists.forEach(l => l.classList.remove('drag-active'));
+    });
+  });
+
+  // Delegate dragstart to handles
+  document.addEventListener('dragstart', e => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) {
+      // Not dragging from handle — cancel
+      if (e.target.closest('.form-ing-wrapper')) e.preventDefault();
+      return;
     }
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
+    _dragSrc = handle.closest('.form-ing-wrapper');
+    if (!_dragSrc) return;
+    _dragSrc.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', ''); // required for Firefox
+  });
+}
+
+function getDragTarget(e, list) {
+  return [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')].find(el => {
+    const rect = el.getBoundingClientRect();
+    return e.clientY >= rect.top && e.clientY <= rect.bottom;
+  }) || null;
+}
+
+function clearDragOver() {
+  document.querySelectorAll('.drag-over-above, .drag-over-below').forEach(el => {
+    el.classList.remove('drag-over-above', 'drag-over-below');
+  });
+}
+
+// ── Touch drag support ────────────────────────────────────────────────────────
+(function() {
+  let touchSrc = null, ghost = null, offsetX = 0, offsetY = 0;
+
+  document.addEventListener('touchstart', e => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    touchSrc = handle.closest('.form-ing-wrapper');
+    if (!touchSrc) return;
+    const touch = e.touches[0];
+    const rect = touchSrc.getBoundingClientRect();
+    offsetX = touch.clientX - rect.left;
+    offsetY = touch.clientY - rect.top;
+
+    ghost = touchSrc.cloneNode(true);
+    ghost.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.8;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:var(--radius);`;
+    document.body.appendChild(ghost);
+    touchSrc.classList.add('dragging');
+
+    document.getElementById('form-ing-list').classList.add('drag-active');
+    document.getElementById('form-topping-list').classList.add('drag-active');
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!touchSrc || !ghost) return;
+    const touch = e.touches[0];
+    ghost.style.left = (touch.clientX - offsetX) + 'px';
+    ghost.style.top  = (touch.clientY - offsetY) + 'px';
+
+    clearDragOver();
+    const lists = [
+      document.getElementById('form-ing-list'),
+      document.getElementById('form-topping-list')
+    ];
+    for (const list of lists) {
+      const wrappers = [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')];
+      for (const w of wrappers) {
+        const rect = w.getBoundingClientRect();
+        if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+          const mid = rect.top + rect.height / 2;
+          w.classList.add(touch.clientY < mid ? 'drag-over-above' : 'drag-over-below');
+          break;
+        }
+      }
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (!touchSrc) return;
+    const touch = e.changedTouches[0];
+    if (ghost) { ghost.remove(); ghost = null; }
+    touchSrc.classList.remove('dragging');
+
+    const lists = [
+      document.getElementById('form-ing-list'),
+      document.getElementById('form-topping-list')
+    ];
+    lists.forEach(l => l.classList.remove('drag-active'));
+
+    for (const list of lists) {
+      const wrappers = [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')];
+      for (const w of wrappers) {
+        if (w.classList.contains('drag-over-above')) {
+          list.insertBefore(touchSrc, w);
+          clearDragOver();
+          touchSrc = null;
+          return;
+        }
+        if (w.classList.contains('drag-over-below')) {
+          list.insertBefore(touchSrc, w.nextSibling);
+          clearDragOver();
+          touchSrc = null;
+          return;
+        }
+      }
+      // Dropped on empty list
+      const lRect = list.getBoundingClientRect();
+      if (touch.clientX >= lRect.left && touch.clientX <= lRect.right &&
+          touch.clientY >= lRect.top  && touch.clientY <= lRect.bottom) {
+        list.appendChild(touchSrc);
+      }
+    }
+    clearDragOver();
+    touchSrc = null;
+  });
 })();
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 openDB();
+initDragDrop();
 </script>
 </body>
 </html>
