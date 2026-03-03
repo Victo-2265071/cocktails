@@ -392,7 +392,6 @@
     transition: border-color 0.2s;
   }
   .recipe-card:hover { border-color: var(--gold-dim); }
-  .recipe-card.makeable { border-color: rgba(74,140,92,0.5); }
 
   .recipe-header {
     display: flex;
@@ -696,7 +695,60 @@
     flex-direction: column;
     gap: 4px;
   }
-  .substitute-row { display: flex; gap: 6px; align-items: center; }
+  .substitute-row { display: flex; gap: 6px; align-items: center; position: relative; }
+  .sub-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: grab;
+    font-size: 0.75rem;
+    width: 14px;
+    flex-shrink: 0;
+    opacity: 0.35;
+    transition: opacity 0.15s;
+    touch-action: none;
+    user-select: none;
+  }
+  .sub-drag-handle:active { cursor: grabbing; }
+  .substitute-row:hover .sub-drag-handle { opacity: 0.75; }
+
+  /* Flèches haut/bas substituts pour PC */
+  .sub-sort-arrows {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    flex-shrink: 0;
+    width: 14px;
+  }
+  .sub-sort-arrow-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.48rem;
+    line-height: 1;
+    padding: 1px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .sub-sort-arrow-btn { opacity: 0.35; }
+  .sub-sort-arrow-btn:hover { color: var(--gold); opacity: 1; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .sub-drag-handle { display: none; }
+    .sub-sort-arrows { display: flex; }
+  }
+  @media (hover: none) {
+    .sub-drag-handle { opacity: 1; }
+  }
+  .substitute-row.sub-dragging { opacity: 0.35; }
+  .substitute-row.sub-drag-over-above { border-top: 2px solid var(--gold-dim); }
+  .substitute-row.sub-drag-over-below { border-bottom: 2px solid var(--gold-dim); }
   .substitute-row .autocomplete-wrapper { flex: 1; min-width: 0; }
   .substitute-row input.sub-input {
     width: 100%;
@@ -796,6 +848,7 @@
     transition: transform 0.2s;
     margin-left: 4px;
   }
+  .sub-toggle-arrow.sub-available { color: var(--green); }
   .sub-toggle-arrow.open { transform: rotate(180deg); }
   .flag-pill.flag-stir { background: rgba(100,170,210,0.12); color: rgba(100,170,210,0.9); border: 1px solid rgba(100,170,210,0.3); }
 
@@ -820,9 +873,41 @@
   }
   .drag-handle:active { cursor: grabbing; }
   .form-ing-wrapper:hover .drag-handle { opacity: 0.8; }
-  .form-ing-wrapper.dragging {
-    opacity: 0.4;
+
+  /* Flèches haut/bas pour PC (pointer fin) */
+  .sort-arrows {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    flex-shrink: 0;
+    width: 18px;
   }
+  .sort-arrow-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.55rem;
+    line-height: 1;
+    padding: 1px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .sort-arrow-btn { opacity: 0.35; }
+  .sort-arrow-btn:hover { color: var(--gold); opacity: 1; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .drag-handle { display: none; }
+    .sort-arrows { display: flex; }
+  }
+  @media (hover: none) {
+    .drag-handle { opacity: 1; }
+  }
+  .form-ing-wrapper.dragging { opacity: 0.4; }
   .drag-over-above { border-top: 2px solid var(--gold); }
   .drag-over-below { border-bottom: 2px solid var(--gold); }
   .drop-zone-label {
@@ -1309,7 +1394,7 @@
   /* INGREDIENT COLOR STATUS */
   .ing-row.ing-available .ing-name { color: var(--green); }
   .ing-row.ing-missing .ing-name { color: var(--text-muted); }
-  .ing-row.ing-sub-available .ing-name { color: #b8a030; }
+  .ing-row.ing-sub-available .ing-name { color: var(--text-muted); }
 
   .tag-section-label {
     font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
@@ -1560,6 +1645,12 @@
     <div class="form-group">
       <label>Nom du cocktail</label>
       <input type="text" id="recipe-name" placeholder="Ex: Old Fashioned">
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:160px;">
+        <label>Quantité</label>
+        <input type="text" id="recipe-quantity" placeholder="Ex: 1 verre, 2 portions…">
+      </div>
     </div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;">
       <div class="form-group" style="flex:1;min-width:160px;">
@@ -2412,14 +2503,19 @@ function recipeAllTags(r) {
 
 // render tag pills for a recipe
 function renderTagPills(r, cardPrefix) {
-  if (!r.tags) return '';
   const SECTION_CLASS = { profil: 'profil', texture: 'texture', sucre: 'sucre', complexite: 'complexite' };
   const pills = [];
-  Object.entries(r.tags).forEach(([sec, vals]) => {
-    (vals || []).forEach(v => {
-      pills.push(`<span class="recipe-tag-pill ${SECTION_CLASS[sec] || ''}">${v}</span>`);
+  if (r.method) {
+    const mLabels = { shake: 'Shake', stir: 'Stir', blend: 'Blend' };
+    pills.push(`<span class="recipe-tag-pill" style="border-color:rgba(74,160,100,0.4);color:rgba(110,195,140,0.85);">${mLabels[r.method]||r.method}</span>`);
+  }
+  if (r.tags) {
+    Object.entries(r.tags).forEach(([sec, vals]) => {
+      (vals || []).forEach(v => {
+        pills.push(`<span class="recipe-tag-pill ${SECTION_CLASS[sec] || ''}">${v}</span>`);
+      });
     });
-  });
+  }
   const toggleFn = cardPrefix === 'mr' ? `toggleMCard(${r.id})` : `toggleCard(${r.id})`;
   return pills.length ? `<div class="recipe-tags" onclick="${toggleFn}" style="cursor:pointer;">${pills.join('')}</div>` : '';
 }
@@ -2738,10 +2834,6 @@ async function renderRecipes() {
   list.innerHTML = filtered.map(r => {
     const makeable = isMakeable(r);
     const metaItems = [];
-    if (r.method) {
-      const mLabels = { shake: 'Shake', stir: 'Stir', blend: 'Blend' };
-      metaItems.push(`<span style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);padding:3px 8px;border:1px solid var(--border);border-radius:2px;">${mLabels[r.method]||r.method}</span>`);
-    }
     if (r.glass) metaItems.push(`<span style="display:flex;align-items:center;gap:5px;color:var(--text-muted);font-size:0.7rem;letter-spacing:0.1em;">${glassIcon(r.glass)}<span>${GLASS_LABELS[r.glass]||r.glass}</span></span>`);
     if (r.rating) metaItems.push(starsDisplay(r.rating));
 
@@ -2751,6 +2843,9 @@ async function renderRecipes() {
       const displayName = resolveIngName(ing);
       // Check if available via substitute
       const availableViaSub = !have && !ing.optional && ing.substitutes && ing.substitutes.some(sub => {
+        const sid = resolveIngId(sub); return sid && _mySet.has(sid);
+      });
+      const anySubAvailable = ing.substitutes && ing.substitutes.some(sub => {
         const sid = resolveIngId(sub); return sid && _mySet.has(sid);
       });
       const isMissing = !have && !ing.optional && !availableViaSub;
@@ -2768,7 +2863,7 @@ async function renderRecipes() {
         return `<div class="sub-display-item ${shave ? 'have-sub' : ''}">${sname}${snotes}</div>`;
       }).join('') : '';
       const nameHtml = hasSubs
-        ? `<span class="ing-name-wrap" style="display:flex;align-items:center;gap:4px;">${displayName}<span class="sub-toggle-arrow">▼</span></span>`
+        ? `<span class="ing-name-wrap" style="display:flex;align-items:center;gap:4px;">${displayName}<span class="sub-toggle-arrow${anySubAvailable ? ' sub-available' : ''}">▼</span></span>`
         : `<span class="ing-name-wrap">${displayName}</span>`;
       const statusClass = have ? 'ing-available' : (availableViaSub ? 'ing-sub-available' : 'ing-missing');
       return `<div class="ing-row ${statusClass} ${hasSubs ? 'has-subs' : ''}" ${hasSubs ? `onclick="toggleSubList(this)"` : ''} style="${hasSubs ? 'cursor:pointer;' : ''}">
@@ -2782,12 +2877,13 @@ async function renderRecipes() {
       ${r.toppings.map(t => {
         const tid = resolveIngId(t); const thave = tid && _mySet.has(tid);
         const availViaSub = !thave && !t.optional && t.substitutes && t.substitutes.some(sub => { const sid = resolveIngId(sub); return sid && _mySet.has(sid); });
+        const anySubAvail = t.substitutes && t.substitutes.some(sub => { const sid = resolveIngId(sub); return sid && _mySet.has(sid); });
         const isMissing = !thave && !t.optional && !availViaSub;
         const dn = resolveIngName(t);
         const f = t.optional ? `<span class="ing-flags"><span class="flag-pill flag-optional">Facultatif</span></span>` : '';
         const hasSubs = t.substitutes && t.substitutes.length > 0;
         const subsHtml = hasSubs ? t.substitutes.map(sub => { const sid = resolveIngId(sub); const shave = sid && _mySet.has(sid); const snotes = sub.notes ? `<span class="sub-display-notes">${sub.notes}</span>` : ''; return `<div class="sub-display-item ${shave ? 'have-sub' : ''}">${resolveIngName(sub)}${snotes}</div>`; }).join('') : '';
-        const nameHtml = hasSubs ? `<span class="ing-name-wrap" style="display:flex;align-items:center;gap:4px;">${dn}<span class="sub-toggle-arrow">▼</span></span>` : `<span class="ing-name-wrap">${dn}</span>`;
+        const nameHtml = hasSubs ? `<span class="ing-name-wrap" style="display:flex;align-items:center;gap:4px;">${dn}<span class="sub-toggle-arrow${anySubAvail ? ' sub-available' : ''}">▼</span></span>` : `<span class="ing-name-wrap">${dn}</span>`;
         const tStatusClass = thave ? 'ing-available' : (availViaSub ? 'ing-sub-available' : 'ing-missing');
         return `<div class="ing-row ${tStatusClass} ${hasSubs ? 'has-subs' : ''}" ${hasSubs ? `onclick="toggleSubList(this)"` : ''} style="${hasSubs ? 'cursor:pointer;' : ''}"><span class="ing-name">${nameHtml}${f}${hasSubs ? `<div class="ing-substitute-list">${subsHtml}</div>` : ''}</span><span class="ing-qty">${t.qty}</span></div>`;
       }).join('')}` : '';
@@ -2810,7 +2906,10 @@ async function renderRecipes() {
       <div class="recipe-card ${makeable ? 'makeable' : ''}" id="rc-${r.id}">
         <div class="recipe-header" onclick="toggleCard(${r.id})">
           <button class="fav-btn ${r.favorite ? 'on' : ''}" onclick="toggleFavorite(${r.id}, event)" title="${r.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">★</button>
-          <span class="rname">${r.name}</span>
+          <span style="flex:1;min-width:0;">
+            <span class="rname">${r.name}</span>
+            ${r.quantity ? `<span style="display:block;font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-style:italic;color:var(--text-muted);letter-spacing:0.04em;margin-top:1px;">${r.quantity}</span>` : ''}
+          </span>
           ${metaItems.length ? '<span class="recipe-meta-wrap" style="display:flex;align-items:center;gap:10px;">' + metaItems.join('') + '</span>' : ''}
           <span class="badge ${makeable ? 'ok' : 'missing'}">${badgeLabel}</span>
           <span class="arrow">▼</span>
@@ -2868,7 +2967,10 @@ async function renderManageList() {
     return `
     <div class="recipe-card" id="mr-${r.id}">
       <div class="recipe-header" onclick="toggleMCard(${r.id})">
-        <span class="rname">${r.name}</span>
+        <span style="flex:1;min-width:0;">
+          <span class="rname">${r.name}</span>
+          ${r.quantity ? `<span style="display:block;font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-style:italic;color:var(--text-muted);letter-spacing:0.04em;margin-top:1px;">${r.quantity}</span>` : ''}
+        </span>
         <span style="display:flex;align-items:center;gap:8px;">
           ${r.glass ? glassIcon(r.glass) : ''}
           ${r.rating ? starsDisplay(r.rating) : ''}
@@ -2899,6 +3001,7 @@ function startNew() {
   document.getElementById('edit-id').value = '';
   document.getElementById('recipe-name').value = '';
   document.getElementById('recipe-glass').value = '';
+  document.getElementById('recipe-quantity').value = '';
   document.getElementById('recipe-notes').value = '';
   document.getElementById('form-title').textContent = 'Nouvelle recette';
   setRating(0);
@@ -2936,6 +3039,10 @@ async function addFormIng(preset = null) {
   const hasOpts = (preset && (preset.optional || (preset.substitutes && preset.substitutes.length))) ? 'has-options' : '';
   row.innerHTML = `
     <span class="drag-handle" title="Déplacer">⠿</span>
+    <span class="sort-arrows">
+      <button type="button" class="sort-arrow-btn" title="Monter" onclick="moveIngWrapper(this,'up')">▲</button>
+      <button type="button" class="sort-arrow-btn" title="Descendre" onclick="moveIngWrapper(this,'down')">▼</button>
+    </span>
     <div class="autocomplete-wrapper">
       <input type="text" placeholder="Ingrédient" class="ing-input" autocomplete="off"
         oninput="showAC(this)" onfocus="showAC(this)">
@@ -3022,6 +3129,31 @@ document.addEventListener('click', e => {
   }
 });
 
+function moveIngWrapper(btn, dir) {
+  const wrapper = btn.closest('.form-ing-wrapper');
+  const list = wrapper.parentElement;
+  if (dir === 'up') {
+    const prev = wrapper.previousElementSibling;
+    if (prev) list.insertBefore(wrapper, prev);
+  } else {
+    const next = wrapper.nextElementSibling;
+    if (next) list.insertBefore(next, wrapper);
+  }
+}
+
+function moveSubRow(btn, dir) {
+  const row = btn.closest('.substitute-row');
+  const list = row.parentElement;
+  if (dir === 'up') {
+    const prev = row.previousElementSibling;
+    if (prev) list.insertBefore(row, prev);
+  } else {
+    const next = row.nextElementSibling;
+    if (next) list.insertBefore(next, row);
+  }
+}
+
+
 function toggleIngPill(btn, cls, wrapper) {
   btn.classList.toggle(cls);
   updateIngOptionsBtn(wrapper);
@@ -3037,7 +3169,13 @@ function updateIngOptionsBtn(wrapper) {
 function addSubstituteRow(subList, preset = null) {
   const row = document.createElement('div');
   row.className = 'substitute-row';
+  row.draggable = true;
   row.innerHTML = `
+    <span class="sub-drag-handle" title="Déplacer">⠿</span>
+    <span class="sub-sort-arrows">
+      <button type="button" class="sub-sort-arrow-btn" title="Monter" onclick="moveSubRow(this,'up')">▲</button>
+      <button type="button" class="sub-sort-arrow-btn" title="Descendre" onclick="moveSubRow(this,'down')">▼</button>
+    </span>
     <div class="autocomplete-wrapper">
       <input type="text" placeholder="Substitut" class="sub-input" autocomplete="off"
         oninput="showSubAC(this)" onfocus="showSubAC(this)">
@@ -3048,6 +3186,11 @@ function addSubstituteRow(subList, preset = null) {
     <button type="button" class="sub-remove-btn" onclick="this.closest('.substitute-row').remove();updateIngOptionsBtn(this.closest('.form-ing-wrapper'))">×</button>
   `;
   subList.appendChild(row);
+  // Init drag drop on subList if not already done
+  if (!subList.dataset.subDragInit) {
+    subList.dataset.subDragInit = '1';
+    initSubDragDrop(subList);
+  }
   if (preset) {
     const ing = preset.id
       ? _cachedIngs.find(i => i.id === preset.id)
@@ -3105,6 +3248,10 @@ async function addFormTopping(preset = null) {
   const hasOpts = (preset && (preset.optional || (preset.substitutes && preset.substitutes.length))) ? 'has-options' : '';
   row.innerHTML = `
     <span class="drag-handle" title="Déplacer">⠿</span>
+    <span class="sort-arrows">
+      <button type="button" class="sort-arrow-btn" title="Monter" onclick="moveIngWrapper(this,'up')">▲</button>
+      <button type="button" class="sort-arrow-btn" title="Descendre" onclick="moveIngWrapper(this,'down')">▼</button>
+    </span>
     <div class="autocomplete-wrapper">
       <input type="text" placeholder="Topping" class="ing-input" autocomplete="off"
         oninput="showAC(this)" onfocus="showAC(this)">
@@ -3208,15 +3355,18 @@ async function saveRecipe() {
   });
   const glass = document.getElementById('recipe-glass').value;
   const method = document.getElementById('recipe-method').value;
+  const quantity = document.getElementById('recipe-quantity').value.trim();
   const rating = parseInt(document.getElementById('recipe-rating').value) || 0;
   const notes = document.getElementById('recipe-notes').value.trim();
   const tags = { profil: [..._formTags.profil], texture: [..._formTags.texture], sucre: [..._formTags.sucre], complexite: [..._formTags.complexite] };
   const editId = document.getElementById('edit-id').value;
   if (editId) {
-    await txPut('recipes', { id: parseInt(editId), name, ingredients, toppings, glass, method, rating, notes, tags });
+    const existing = await txGet('recipes', parseInt(editId));
+    const favorite = existing ? (existing.favorite || false) : false;
+    await txPut('recipes', { id: parseInt(editId), name, ingredients, toppings, glass, method, quantity, rating, notes, tags, favorite });
     toast('Recette mise à jour');
   } else {
-    await txAdd('recipes', { name, ingredients, toppings, glass, method, rating, notes, tags });
+    await txAdd('recipes', { name, ingredients, toppings, glass, method, quantity, rating, notes, tags });
     toast('Recette enregistrée');
   }
   startNew();
@@ -3229,6 +3379,7 @@ async function editRecipe(id) {
   showTab('manage');
   document.getElementById('recipe-name').value = r.name;
   document.getElementById('recipe-glass').value = r.glass || '';
+  document.getElementById('recipe-quantity').value = r.quantity || '';
   document.getElementById('recipe-notes').value = r.notes || '';
   document.getElementById('form-title').textContent = 'Modifier — ' + r.name;
   setRating(r.rating || 0);
@@ -3323,6 +3474,65 @@ function reconfigure() {
   observer.observe(header);
 })();
 
+// ─── DRAG & DROP SUBSTITUTS ───────────────────────────────────────────────────
+let _subDragSrc = null;
+
+function initSubDragDrop(subList) {
+  subList.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = getSubDragTarget(e, subList);
+    clearSubDragOver(subList);
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      target.classList.add(e.clientY < mid ? 'sub-drag-over-above' : 'sub-drag-over-below');
+    }
+    e.stopPropagation();
+  });
+
+  subList.addEventListener('dragleave', e => {
+    if (!subList.contains(e.relatedTarget)) clearSubDragOver(subList);
+  });
+
+  subList.addEventListener('drop', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!_subDragSrc || !subList.contains(_subDragSrc)) return;
+    const target = getSubDragTarget(e, subList);
+    clearSubDragOver(subList);
+    if (target && target !== _subDragSrc) {
+      const rect = target.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) subList.insertBefore(_subDragSrc, target);
+      else subList.insertBefore(_subDragSrc, target.nextSibling);
+    }
+    if (_subDragSrc) _subDragSrc.classList.remove('sub-dragging');
+    _subDragSrc = null;
+  });
+
+  subList.addEventListener('dragend', () => {
+    if (_subDragSrc) { _subDragSrc.classList.remove('sub-dragging'); _subDragSrc = null; }
+    clearSubDragOver(subList);
+  });
+}
+
+function getSubDragTarget(e, subList) {
+  return [...subList.querySelectorAll('.substitute-row:not(.sub-dragging)')].find(el => {
+    const rect = el.getBoundingClientRect();
+    return e.clientY >= rect.top && e.clientY <= rect.bottom;
+  }) || null;
+}
+
+function clearSubDragOver(subList) {
+  subList.querySelectorAll('.sub-drag-over-above, .sub-drag-over-below').forEach(el => {
+    el.classList.remove('sub-drag-over-above', 'sub-drag-over-below');
+  });
+}
+
+
+
+
+
 // ─── DRAG & DROP INGRÉDIENTS ──────────────────────────────────────────────────
 let _dragSrc = null;
 
@@ -3382,12 +3592,23 @@ function initDragDrop() {
     });
   });
 
-  // Delegate dragstart to handles
+  // Delegate dragstart to handles (ingredients + substitutes)
   document.addEventListener('dragstart', e => {
+    // Substitute drag handle
+    const subHandle = e.target.closest('.sub-drag-handle');
+    if (subHandle) {
+      _subDragSrc = subHandle.closest('.substitute-row');
+      if (!_subDragSrc) return;
+      _subDragSrc.classList.add('sub-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', '');
+      return;
+    }
+    // Ingredient drag handle
     const handle = e.target.closest('.drag-handle');
     if (!handle) {
-      // Not dragging from handle — cancel
-      if (e.target.closest('.form-ing-wrapper')) e.preventDefault();
+      // Not dragging from handle — cancel only for ingredient wrappers (not substitute rows)
+      if (e.target.closest('.form-ing-wrapper') && !e.target.closest('.substitute-row')) e.preventDefault();
       return;
     }
     _dragSrc = handle.closest('.form-ing-wrapper');
@@ -3411,92 +3632,145 @@ function clearDragOver() {
   });
 }
 
-// ── Touch drag support ────────────────────────────────────────────────────────
+// ── Touch drag support (ingrédients + substituts) ─────────────────────────────
 (function() {
+  // Mode actif : 'ing' | 'sub' | null
+  let mode = null;
+
+  // — Ingrédients —
   let touchSrc = null, ghost = null, offsetX = 0, offsetY = 0;
 
+  // — Substituts —
+  let subTouchSrc = null, subGhost = null, subOffsetX = 0, subOffsetY = 0;
+
   document.addEventListener('touchstart', e => {
+    // Priorité aux substituts (poignée plus petite, imbriquée dans ingrédients)
+    const subHandle = e.target.closest('.sub-drag-handle');
+    if (subHandle) {
+      subTouchSrc = subHandle.closest('.substitute-row');
+      if (!subTouchSrc) return;
+      mode = 'sub';
+      const touch = e.touches[0];
+      const rect = subTouchSrc.getBoundingClientRect();
+      subOffsetX = touch.clientX - rect.left;
+      subOffsetY = touch.clientY - rect.top;
+      subGhost = subTouchSrc.cloneNode(true);
+      subGhost.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.8;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:var(--radius);`;
+      document.body.appendChild(subGhost);
+      subTouchSrc.classList.add('sub-dragging');
+      e.preventDefault();
+      return;
+    }
+
     const handle = e.target.closest('.drag-handle');
     if (!handle) return;
     touchSrc = handle.closest('.form-ing-wrapper');
     if (!touchSrc) return;
+    mode = 'ing';
     const touch = e.touches[0];
     const rect = touchSrc.getBoundingClientRect();
     offsetX = touch.clientX - rect.left;
     offsetY = touch.clientY - rect.top;
-
     ghost = touchSrc.cloneNode(true);
     ghost.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.8;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:var(--radius);`;
     document.body.appendChild(ghost);
     touchSrc.classList.add('dragging');
-
     document.getElementById('form-ing-list').classList.add('drag-active');
     document.getElementById('form-topping-list').classList.add('drag-active');
     e.preventDefault();
   }, { passive: false });
 
   document.addEventListener('touchmove', e => {
-    if (!touchSrc || !ghost) return;
-    const touch = e.touches[0];
-    ghost.style.left = (touch.clientX - offsetX) + 'px';
-    ghost.style.top  = (touch.clientY - offsetY) + 'px';
-
-    clearDragOver();
-    const lists = [
-      document.getElementById('form-ing-list'),
-      document.getElementById('form-topping-list')
-    ];
-    for (const list of lists) {
-      const wrappers = [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')];
-      for (const w of wrappers) {
-        const rect = w.getBoundingClientRect();
+    if (mode === 'sub' && subTouchSrc && subGhost) {
+      const touch = e.touches[0];
+      subGhost.style.left = (touch.clientX - subOffsetX) + 'px';
+      subGhost.style.top  = (touch.clientY - subOffsetY) + 'px';
+      const subList = subTouchSrc.closest('.substitutes-list');
+      if (!subList) { e.preventDefault(); return; }
+      clearSubDragOver(subList);
+      for (const r of [...subList.querySelectorAll('.substitute-row:not(.sub-dragging)')]) {
+        const rect = r.getBoundingClientRect();
         if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-          const mid = rect.top + rect.height / 2;
-          w.classList.add(touch.clientY < mid ? 'drag-over-above' : 'drag-over-below');
+          r.classList.add(touch.clientY < rect.top + rect.height / 2 ? 'sub-drag-over-above' : 'sub-drag-over-below');
           break;
         }
       }
+      e.preventDefault();
+      return;
     }
-    e.preventDefault();
+
+    if (mode === 'ing' && touchSrc && ghost) {
+      const touch = e.touches[0];
+      ghost.style.left = (touch.clientX - offsetX) + 'px';
+      ghost.style.top  = (touch.clientY - offsetY) + 'px';
+      clearDragOver();
+      const lists = [
+        document.getElementById('form-ing-list'),
+        document.getElementById('form-topping-list')
+      ];
+      for (const list of lists) {
+        for (const w of [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')]) {
+          const rect = w.getBoundingClientRect();
+          if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            w.classList.add(touch.clientY < rect.top + rect.height / 2 ? 'drag-over-above' : 'drag-over-below');
+            break;
+          }
+        }
+      }
+      e.preventDefault();
+    }
   }, { passive: false });
 
   document.addEventListener('touchend', e => {
-    if (!touchSrc) return;
-    const touch = e.changedTouches[0];
-    if (ghost) { ghost.remove(); ghost = null; }
-    touchSrc.classList.remove('dragging');
-
-    const lists = [
-      document.getElementById('form-ing-list'),
-      document.getElementById('form-topping-list')
-    ];
-    lists.forEach(l => l.classList.remove('drag-active'));
-
-    for (const list of lists) {
-      const wrappers = [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')];
-      for (const w of wrappers) {
-        if (w.classList.contains('drag-over-above')) {
-          list.insertBefore(touchSrc, w);
-          clearDragOver();
-          touchSrc = null;
-          return;
+    if (mode === 'sub' && subTouchSrc) {
+      const touch = e.changedTouches[0];
+      if (subGhost) { subGhost.remove(); subGhost = null; }
+      subTouchSrc.classList.remove('sub-dragging');
+      const subList = subTouchSrc.closest('.substitutes-list');
+      if (subList) {
+        for (const r of [...subList.querySelectorAll('.substitute-row')]) {
+          if (r.classList.contains('sub-drag-over-above')) {
+            subList.insertBefore(subTouchSrc, r); break;
+          }
+          if (r.classList.contains('sub-drag-over-below')) {
+            subList.insertBefore(subTouchSrc, r.nextSibling); break;
+          }
         }
-        if (w.classList.contains('drag-over-below')) {
-          list.insertBefore(touchSrc, w.nextSibling);
-          clearDragOver();
-          touchSrc = null;
-          return;
-        }
+        clearSubDragOver(subList);
       }
-      // Dropped on empty list
-      const lRect = list.getBoundingClientRect();
-      if (touch.clientX >= lRect.left && touch.clientX <= lRect.right &&
-          touch.clientY >= lRect.top  && touch.clientY <= lRect.bottom) {
-        list.appendChild(touchSrc);
-      }
+      subTouchSrc = null;
+      mode = null;
+      return;
     }
-    clearDragOver();
-    touchSrc = null;
+
+    if (mode === 'ing' && touchSrc) {
+      const touch = e.changedTouches[0];
+      if (ghost) { ghost.remove(); ghost = null; }
+      touchSrc.classList.remove('dragging');
+      const lists = [
+        document.getElementById('form-ing-list'),
+        document.getElementById('form-topping-list')
+      ];
+      lists.forEach(l => l.classList.remove('drag-active'));
+      for (const list of lists) {
+        for (const w of [...list.querySelectorAll('.form-ing-wrapper:not(.dragging)')]) {
+          if (w.classList.contains('drag-over-above')) {
+            list.insertBefore(touchSrc, w); clearDragOver(); touchSrc = null; mode = null; return;
+          }
+          if (w.classList.contains('drag-over-below')) {
+            list.insertBefore(touchSrc, w.nextSibling); clearDragOver(); touchSrc = null; mode = null; return;
+          }
+        }
+        const lRect = list.getBoundingClientRect();
+        if (touch.clientX >= lRect.left && touch.clientX <= lRect.right &&
+            touch.clientY >= lRect.top  && touch.clientY <= lRect.bottom) {
+          list.appendChild(touchSrc);
+        }
+      }
+      clearDragOver();
+      touchSrc = null;
+      mode = null;
+    }
   });
 })();
 
