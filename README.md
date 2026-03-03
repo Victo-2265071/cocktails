@@ -2,6 +2,8 @@
 
 Bienvenue sur **Le Bar**. L'application est déjà hébergée et prête à l'emploi — vous n'avez qu'à créer votre propre repo GitHub pour stocker vos données personnelles (ingrédients et recettes).
 
+URL : https://victo-2265071.github.io/cocktails/
+
 ---
 
 ## Comment ça marche
