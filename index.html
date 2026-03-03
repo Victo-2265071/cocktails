@@ -3132,12 +3132,27 @@ document.addEventListener('click', e => {
 function moveIngWrapper(btn, dir) {
   const wrapper = btn.closest('.form-ing-wrapper');
   const list = wrapper.parentElement;
+  const ingList     = document.getElementById('form-ing-list');
+  const toppingList = document.getElementById('form-topping-list');
+
   if (dir === 'up') {
     const prev = wrapper.previousElementSibling;
-    if (prev) list.insertBefore(wrapper, prev);
+    if (prev && prev.classList.contains('form-ing-wrapper')) {
+      list.insertBefore(wrapper, prev);
+    } else if (!prev && list === toppingList) {
+      // Premier topping → passe en dernier ingrédient
+      ingList.appendChild(wrapper);
+    }
   } else {
     const next = wrapper.nextElementSibling;
-    if (next) list.insertBefore(next, wrapper);
+    if (next && next.classList.contains('form-ing-wrapper')) {
+      list.insertBefore(next, wrapper);
+    } else if (!next && list === ingList) {
+      // Dernier ingrédient → passe en premier topping
+      const firstTopping = toppingList.querySelector('.form-ing-wrapper');
+      if (firstTopping) toppingList.insertBefore(wrapper, firstTopping);
+      else toppingList.appendChild(wrapper);
+    }
   }
 }
 
