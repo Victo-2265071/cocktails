@@ -1562,9 +1562,11 @@
             <button class="filter-chip" data-val="shake" data-type="required" onclick="selectMethodFilter(this)">Shake requis</button>
             <button class="filter-chip" data-val="stir" data-type="required" onclick="selectMethodFilter(this)">Stir requis</button>
             <button class="filter-chip" data-val="blend" data-type="required" onclick="selectMethodFilter(this)">Blend requis</button>
+            <button class="filter-chip" data-val="muddle" data-type="required" onclick="selectMethodFilter(this)">Muddle requis</button>
             <button class="filter-chip" data-val="shake" data-type="exclude" onclick="selectMethodFilter(this)">Sans shake</button>
             <button class="filter-chip" data-val="stir" data-type="exclude" onclick="selectMethodFilter(this)">Sans stir</button>
             <button class="filter-chip" data-val="blend" data-type="exclude" onclick="selectMethodFilter(this)">Sans blend</button>
+            <button class="filter-chip" data-val="muddle" data-type="exclude" onclick="selectMethodFilter(this)">Sans muddle</button>
           </div>
         </div>
         <div class="filter-panel-divider"></div>
@@ -1705,6 +1707,7 @@
         <button type="button" class="method-chip" data-val="shake" onclick="selectMethod(this)">Shake</button>
         <button type="button" class="method-chip" data-val="stir" onclick="selectMethod(this)">Stir</button>
         <button type="button" class="method-chip" data-val="blend" onclick="selectMethod(this)">Blend</button>
+        <button type="button" class="method-chip" data-val="muddle" onclick="selectMethod(this)">Muddle</button>
       </div>
       <input type="hidden" id="recipe-method" value="">
     </div>
@@ -2154,24 +2157,36 @@ function setRating(val) {
 }
 
 function selectMethod(btn) {
-  const current = document.getElementById('recipe-method').value;
   const val = btn.dataset.val;
-  if (current === val) {
-    // Désélectionner
-    document.getElementById('recipe-method').value = '';
-    document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => c.classList.remove('active'));
+  const methods = getSelectedMethods();
+  const idx = methods.indexOf(val);
+  if (idx >= 0) {
+    methods.splice(idx, 1);
   } else {
-    document.getElementById('recipe-method').value = val;
-    document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
+    methods.push(val);
   }
+  setSelectedMethods(methods);
+}
+
+function getSelectedMethods() {
+  const raw = document.getElementById('recipe-method').value;
+  if (!raw) return [];
+  return raw.split(',').filter(Boolean);
+}
+
+function setSelectedMethods(methods) {
+  document.getElementById('recipe-method').value = methods.join(',');
+  document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => {
+    c.classList.toggle('active', methods.includes(c.dataset.val));
+  });
 }
 
 function selectMethodVal(val) {
-  document.getElementById('recipe-method').value = val || '';
-  document.querySelectorAll('#recipe-method-chips .method-chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.val === val);
-  });
+  // val peut être une string séparée par virgules ou un tableau
+  let methods = [];
+  if (Array.isArray(val)) methods = val.filter(Boolean);
+  else if (val) methods = val.split(',').filter(Boolean);
+  setSelectedMethods(methods);
 }
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
@@ -2506,8 +2521,11 @@ function renderTagPills(r, cardPrefix) {
   const SECTION_CLASS = { profil: 'profil', texture: 'texture', sucre: 'sucre', complexite: 'complexite' };
   const pills = [];
   if (r.method) {
-    const mLabels = { shake: 'Shake', stir: 'Stir', blend: 'Blend' };
-    pills.push(`<span class="recipe-tag-pill" style="border-color:rgba(74,160,100,0.4);color:rgba(110,195,140,0.85);">${mLabels[r.method]||r.method}</span>`);
+    const mLabels = { shake: 'Shake', stir: 'Stir', blend: 'Blend', muddle: 'Muddle' };
+    const methodArr = Array.isArray(r.method) ? r.method : (r.method ? r.method.split(',').filter(Boolean) : []);
+    methodArr.forEach(m => {
+      pills.push(`<span class="recipe-tag-pill" style="border-color:rgba(74,160,100,0.4);color:rgba(110,195,140,0.85);">${mLabels[m]||m}</span>`);
+    });
   }
   if (r.tags) {
     Object.entries(r.tags).forEach(([sec, vals]) => {
@@ -2667,7 +2685,7 @@ function selectMethodFilter(btn) {
   if (!filterMethod.required && filterMethod.excludes.size === 0) {
     valEl.textContent = 'Tous'; valEl.classList.add('unset');
   } else if (filterMethod.required) {
-    const labels = { shake: 'Shake requis', stir: 'Stir requis', blend: 'Blend requis' };
+    const labels = { shake: 'Shake requis', stir: 'Stir requis', blend: 'Blend requis', muddle: 'Muddle requis' };
     valEl.textContent = labels[filterMethod.required]; valEl.classList.remove('unset');
   } else {
     const labels = [...filterMethod.excludes].map(v => 'Sans ' + v).join(', ');
@@ -2804,10 +2822,16 @@ async function renderRecipes() {
     [...(r.ingredients || []), ...(r.toppings || [])].some(i => resolveIngId(i) === _activeIngId)
   );
   if (filterMethod.required) {
-    filtered = filtered.filter(r => r.method === filterMethod.required);
+    filtered = filtered.filter(r => {
+      const rm = Array.isArray(r.method) ? r.method : (r.method ? r.method.split(',').filter(Boolean) : []);
+      return rm.includes(filterMethod.required);
+    });
   }
   if (filterMethod.excludes.size > 0) {
-    filtered = filtered.filter(r => !filterMethod.excludes.has(r.method || ''));
+    filtered = filtered.filter(r => {
+      const rm = Array.isArray(r.method) ? r.method : (r.method ? r.method.split(',').filter(Boolean) : []);
+      return ![...filterMethod.excludes].some(ex => rm.includes(ex));
+    });
   }
   if (_activeFilterTags.size > 0) {
     filtered = filtered.filter(r => {
@@ -3005,7 +3029,7 @@ function startNew() {
   document.getElementById('recipe-notes').value = '';
   document.getElementById('form-title').textContent = 'Nouvelle recette';
   setRating(0);
-  selectMethodVal('');
+  selectMethodVal([]);
   resetFormTags();
   renderFormIngs([], []);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3369,7 +3393,8 @@ async function saveRecipe() {
     }
   });
   const glass = document.getElementById('recipe-glass').value;
-  const method = document.getElementById('recipe-method').value;
+  const methods = getSelectedMethods();
+  const method = methods.length ? methods : [];
   const quantity = document.getElementById('recipe-quantity').value.trim();
   const rating = parseInt(document.getElementById('recipe-rating').value) || 0;
   const notes = document.getElementById('recipe-notes').value.trim();
